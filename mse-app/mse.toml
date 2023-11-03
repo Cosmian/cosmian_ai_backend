@@ -1,0 +1,15 @@
+name = "t5-summarize-demo"
+python_application = "app:app"
+healthcheck_endpoint = "/health"
+tests_cmd = "pytest"
+tests_requirements = [
+    "intel-sgx-ra",
+    "pytest==7.2.0",
+]
+
+[cloud]
+project = "default"
+hardware = "8g-eu-001"
+code = "mse_src"
+tests = "tests"
+docker = "ghcr.io/cosmian/mse-nlp:20230810125235"
