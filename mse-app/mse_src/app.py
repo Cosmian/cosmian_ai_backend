@@ -1,6 +1,8 @@
 import os
 from http import HTTPStatus
 
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -15,13 +17,22 @@ tokenizer = AutoTokenizer.from_pretrained(f"{CWD_PATH}/t5-base-tokenizer")
 
 @app.post("/summarize")
 def summarize():
+    if not "key" in request.form:
+        return ("Error: Missing key", 400)
+
+    key = request.form["key"]
+    aes = AES.new(key.encode("utf-8"), AES.MODE_CBC, b"a" * 16)
+
     if "encrypted_doc" not in request.files:
         return ("Error: Missing file", 400)
 
     # Read file from client
-    text = request.files["encrypted_doc"].read().decode("utf-8")
+    ciphertext = request.files["encrypted_doc"].read()
+    print("Ciphertext len:", len(ciphertext))
 
-    # TODO: decrypt here
+    # Decrypt here
+    text = unpad(aes.decrypt(ciphertext), aes.block_size).decode("utf-8")
+    print("Cleartext len:", len(text))
 
     # Preprocess and tokenize
     preprocess_text = text.strip().replace("\n", "")

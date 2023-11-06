@@ -1,4 +1,4 @@
-name = "t5-summarize-demo"
+name = "demo-cse-summarize"
 python_application = "app:app"
 healthcheck_endpoint = "/health"
 tests_cmd = "pytest"

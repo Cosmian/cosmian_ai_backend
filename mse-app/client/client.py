@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
-import numpy as np
-import pandas as pd
 import requests
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
 
 cwd_path: Path = Path(__file__).parent.resolve()
-PLAIN_DOC_PATH = cwd_path / "doc.txt"
+ENCRYPTED_DOC_PATH = cwd_path / "doc.enc"
+KEY = b"Secret Key Tests"
 
 
 def get_certificate(hostname: str, port: int) -> str:
@@ -26,12 +27,18 @@ def get_certificate(hostname: str, port: int) -> str:
             return ssl.DER_cert_to_PEM_cert(bin_cert)
 
 
-def summarize_data(plain_doc_path: str, url: str, cert_path: Optional[Path] = None):
-    files = {"encrypted_doc": open(plain_doc_path, "rb")}
+def summarize_data(
+    encrypted_doc_path: Path, url: str, cert_path: Optional[Path] = None
+):
+    files = {"encrypted_doc": open(encrypted_doc_path, "rb")}
+    data = {
+        "key": KEY,
+    }
     try:
         response: requests.Response = requests.post(
             f"{url}/summarize",
             files=files,
+            data=data,
             verify=cert_path,
         )
     except requests.exceptions.SSLError as e:
@@ -44,11 +51,11 @@ def summarize_data(plain_doc_path: str, url: str, cert_path: Optional[Path] = No
             f"Bad response from server: {response.status_code} {response.text}"
         )
 
-    print("Summary:")
+    print("Response:")
     print(response.text)
 
 
-def main(url: str, self_signed_ssl: bool = True):
+def main(url: str, doc_path: str, self_signed_ssl: bool = True):
     parsed_url = urlparse(url)
 
     cert_path: Optional[Path] = None
@@ -60,18 +67,24 @@ def main(url: str, self_signed_ssl: bool = True):
         cert_data = get_certificate(hostname, port)
         cert_path.write_bytes(cert_data.encode("utf-8"))
 
-    # TODO: encrypt here
+    # Encrypt doc
+    aes = AES.new(KEY, AES.MODE_CBC, b"a" * 16)
+    with open(doc_path) as f:
+        ciphertext = aes.encrypt(pad(f.read().encode("utf-8"), aes.block_size))
+    with open(ENCRYPTED_DOC_PATH, "wb") as f:
+        f.write(ciphertext)
 
-    summarize_data(PLAIN_DOC_PATH, url, cert_path)
+    summarize_data(ENCRYPTED_DOC_PATH, url, cert_path)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data provider example.")
     parser.add_argument("url", type=str, help="URL of the secure API")
+    parser.add_argument("doc", type=str, help="The document to summarize")
 
     try:
         args = parser.parse_args()
-        main(args.url)
+        main(args.url, args.doc)
     except SystemExit:
         parser.print_help()
         raise
