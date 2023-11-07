@@ -1,5 +1,0 @@
-tokenizers==0.13.3
-Flask-Cors==3.0.10
-Flask[async]==3.0.0
-pycryptodome==3.17
-cosmian-kms==4.8.2

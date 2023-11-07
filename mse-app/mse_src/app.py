@@ -25,13 +25,14 @@ SECRETS = json.loads(
     Path(os.getenv("SECRETS_PATH", "../secrets.json")).read_text(encoding="utf-8")
 )
 client = KmsClient(
-    "https://developer-example.cosmian.com/kms", api_key=SECRETS["kms_api_key"]
+    "https://developer-example.cosmian.com/kms",
+    api_key=SECRETS["kms_api_key"],
+    insecure_mode=True,
 )
 
 
 @app.post("/summarize")
 async def summarize():
-    print("DEBUG", request.form)
     if not "key_id" in request.form:
         return ("Error: Missing key id", 400)
     if not "nonce" in request.form:
