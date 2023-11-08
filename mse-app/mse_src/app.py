@@ -7,13 +7,12 @@ from pathlib import Path
 from cosmian_kms import KmsClient
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 CWD_PATH = os.getenv("MODULE_PATH")
 model = AutoModelForSeq2SeqLM.from_pretrained(f"{CWD_PATH}/t5-base-model")
@@ -55,7 +54,7 @@ async def summarize():
     print("Ciphertext len:", len(ciphertext))
 
     # Decrypt doc
-    text = unpad(aes.decrypt(ciphertext), aes.block_size).decode("utf-8")
+    text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
     print("Cleartext len:", len(text))
 
     # Preprocess and tokenize
@@ -78,12 +77,12 @@ async def summarize():
     # Encrypt output
     nonce = get_random_bytes(12)
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    enc_output = aes.encrypt(pad(output.encode("utf-8"), aes.block_size))
+    enc_output, tag = aes.encrypt_and_digest(output.encode("utf-8"))
 
     return jsonify(
         {
             "nonce": b64encode(nonce).decode("utf-8"),
-            "encrypted_summary": b64encode(enc_output).decode("utf-8"),
+            "encrypted_summary": b64encode(enc_output + tag).decode("utf-8"),
         }
     )
 

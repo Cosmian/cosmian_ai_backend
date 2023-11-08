@@ -13,7 +13,6 @@ import requests
 from cosmian_kms import KmsClient
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
 
 cwd_path: Path = Path(__file__).parent.resolve()
 ENCRYPTED_DOC_PATH = cwd_path / "doc.enc"
@@ -80,16 +79,16 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = True):
     key = await client.get_object(KEY_ID)
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
     with open(doc_path, "rb") as f:
-        ciphertext = aes.encrypt(pad(f.read(), aes.block_size))
+        ciphertext, tag = aes.encrypt_and_digest(f.read())
     with open(ENCRYPTED_DOC_PATH, "wb") as f:
-        f.write(ciphertext)
+        f.write(ciphertext + tag)
 
     response = summarize_data(ENCRYPTED_DOC_PATH, nonce, url, cert_path)
 
     ciphertext = b64decode(response["encrypted_summary"])
     nonce = b64decode(response["nonce"])
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    text = unpad(aes.decrypt(ciphertext), aes.block_size).decode("utf-8")
+    text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
     print("Summary:", text)
 
 
