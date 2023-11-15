@@ -87,11 +87,10 @@ async def kms_summarize():
 
 @app.post("/client_summarize")
 async def client_summarize():
-    if "doc" not in request.files:
+    # Get text from client
+    if "doc" not in request.form:
         return ("Error: Missing file", 400)
-
-    # Read file from client
-    text = request.files["doc"].read().decode("utf-8")
+    text = request.form["doc"]
 
     # Preprocess and tokenize
     preprocess_text = text.strip().replace("\n", "")
@@ -104,12 +103,12 @@ async def client_summarize():
         tokenized_text,
         num_beams=4,
         no_repeat_ngram_size=2,
-        min_length=10,
+        min_length=30,
         max_length=200,
         early_stopping=True,
     )
-    output = tokenizer.decode(summary_tokens[0], skip_special_tokens=True)
 
+    output = tokenizer.decode(summary_tokens[0], skip_special_tokens=True)
     return jsonify(
         {
             "summary": output,

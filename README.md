@@ -8,11 +8,11 @@ Confidential computing demo on how to use LLMs on GWS encrypted docs
 
 Input
 
-```json
+```js
 multipart
-data: {
-    "key_id": "str",
-    "nonce": "base64",
+form: {
+    key_id: "str",
+    nonce: "base64",
 }
 
 file: "encrypted_doc"
@@ -20,25 +20,28 @@ file: "encrypted_doc"
 
 Output
 
-```json
+```js
 {
-    "encrypted_summary": "base64",
-    "nonce": "base64",
+    encrypted_summary: "base64",
+    nonce: "base64",
 }
 ```
 
-* `client_summarize`
+* `/client_summarize`
 
 Request:
 
-```json
-file: "doc"
+```js
+
+form: {
+    doc: "str",
+}
 ```
 
 Response:
 
-```json
+```js
 {
-    "summarize": "str"
+    summarize: "str"
 }
 ```
