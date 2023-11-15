@@ -16,7 +16,7 @@ from Crypto.Random import get_random_bytes
 
 cwd_path: Path = Path(__file__).parent.resolve()
 ENCRYPTED_DOC_PATH = cwd_path / "doc.enc"
-KEY_ID = "d2a0cc6f-7ec6-420f-aaaa-c1327187d67e"
+KEY_ID = "b7bfda1a-0b34-40ab-aa59-8acc367044b4"
 
 # read KMS API key from secret file
 SECRETS = json.loads((cwd_path.parent / "secrets.json").read_text(encoding="utf-8"))
@@ -40,13 +40,13 @@ def get_certificate(hostname: str, port: int) -> str:
 def summarize_data(
     encrypted_doc_path: Path, nonce: bytes, url: str, cert_path: Optional[Path] = None
 ):
-    files = {"encrypted_doc": open(encrypted_doc_path, "rb")}
+    files = {"doc": open(encrypted_doc_path, "rb")}
     data = {"key_id": KEY_ID, "nonce": b64encode(nonce)}
     try:
         response: requests.Response = requests.post(
-            f"{url}/summarize",
+            f"{url}/client_summarize",
             files=files,
-            data=data,
+            # data=data,
             verify=cert_path,
         )
     except requests.exceptions.SSLError as e:
@@ -62,7 +62,7 @@ def summarize_data(
     return json.loads(response.text)
 
 
-async def main(url: str, doc_path: str, self_signed_ssl: bool = True):
+async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
     parsed_url = urlparse(url)
 
     cert_path: Optional[Path] = None
@@ -76,20 +76,20 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = True):
 
     # Encrypt doc
     nonce = get_random_bytes(12)
-    key = await client.get_object(KEY_ID)
-    aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    with open(doc_path, "rb") as f:
-        ciphertext, tag = aes.encrypt_and_digest(f.read())
-    with open(ENCRYPTED_DOC_PATH, "wb") as f:
-        f.write(ciphertext + tag)
+    # key = await client.get_object(KEY_ID)
+    # aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
+    # with open(doc_path, "rb") as f:
+    #    ciphertext, tag = aes.encrypt_and_digest(f.read())
+    # with open(ENCRYPTED_DOC_PATH, "wb") as f:
+    #    f.write(ciphertext + tag)
 
-    response = summarize_data(ENCRYPTED_DOC_PATH, nonce, url, cert_path)
+    response = summarize_data(doc_path, nonce, url, cert_path)
 
-    ciphertext = b64decode(response["encrypted_summary"])
-    nonce = b64decode(response["nonce"])
-    aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
-    print("Summary:", text)
+    # ciphertext = b64decode(response["encrypted_summary"])
+    # nonce = b64decode(response["nonce"])
+    # aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
+    # text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
+    print("Summary:", response["summary"])
 
 
 if __name__ == "__main__":
