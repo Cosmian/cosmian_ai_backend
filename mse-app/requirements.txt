@@ -1,0 +1,8 @@
+Flask==3.0
+Flask-Cors==4.0
+torch==2.1
+transformers==4.35
+tokenizers==0.14
+pycryptodome==3.19
+cosmian-kms==4.9
+gunicorn==21.2

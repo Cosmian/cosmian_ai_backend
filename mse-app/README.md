@@ -1,6 +1,18 @@
 # API to run a NLP model in a secure enclave
 
-## Usage
+## Build and use local image
+
+```bash
+docker build -t local/cse-cc-demo .
+```
+
+* Run
+
+```bash
+docker run -it -p 5000:5000 local/cse-cc-demo
+```
+
+## MSE Usage
 
 * Run flask server
 
