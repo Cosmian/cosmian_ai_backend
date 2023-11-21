@@ -1,0 +1,8 @@
+version: '3'
+services:
+  demo-prod:
+    image: local/demo-cse-cc
+    ports:
+      - "5002:5000"
+    env_file:
+      - config.env

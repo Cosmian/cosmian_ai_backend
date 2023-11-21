@@ -3,13 +3,13 @@
 ## Build and use local image
 
 ```bash
-docker build -t local/cse-cc-demo .
+docker build -t local/demo-cse-cc .
 ```
 
 * Run
 
 ```bash
-docker run -it -p 5000:5000 local/cse-cc-demo
+docker run -it -p 5000:5000 local/demo-cse-cc
 ```
 
 ## MSE Usage
