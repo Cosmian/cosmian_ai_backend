@@ -14,19 +14,16 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-CWD_PATH = os.getenv("MODULE_PATH")
-model = AutoModelForSeq2SeqLM.from_pretrained(f"{CWD_PATH}/t5-base-model")
-tokenizer = AutoTokenizer.from_pretrained(f"{CWD_PATH}/t5-base-tokenizer")
+MODEL_NAME = os.getenv("MODEL_NAME")
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 
-# read KMS API key from secret file
-SECRETS = json.loads(
-    Path(os.getenv("SECRETS_PATH", "../secrets.json")).read_text(encoding="utf-8")
-)
+KMS_URL = os.getenv("KMS_URL")
+KMS_API_KEY = os.getenv("KMS_API_KEY")
 client = KmsClient(
-    "https://developer-example.cosmian.com/kms",
-    api_key=SECRETS["kms_api_key"],
-    insecure_mode=True,
+    KMS_URL,
+    api_key=KMS_API_KEY,
 )
 
 
