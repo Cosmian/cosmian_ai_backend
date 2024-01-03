@@ -11,7 +11,7 @@ RUN pip install -r requirements.txt
 
 COPY ./src /usr/src/app
 
-ENV MODEL_NAME google/flan-t5-base
+ENV MODEL_NAME facebook/bart-large-cnn
 ENV KMS_URL https://kms.url
 ENV KMS_API_KEY XXXX
 

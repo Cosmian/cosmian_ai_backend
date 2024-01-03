@@ -9,12 +9,13 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-from transformers import pipeline
+from transformers import AutoTokenizer, pipeline
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 MODEL_NAME = os.getenv("MODEL_NAME")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 summarizer = pipeline("summarization", model=MODEL_NAME)
 
 
@@ -53,14 +54,22 @@ async def kms_summarize():
 
     # Preprocess
     preprocess_text = text.strip().replace("\n", "")
+    input_tokens_length = len(
+        tokenizer.encode(
+            preprocess_text, return_tensors="pt", max_length=512, truncation=True
+        )
+    )
 
     # Summarize
-    summary = summarizer(preprocess_text)
+    summary = summarizer(
+        preprocess_text, max_length=min(input_tokens_length, 130), do_sample=True
+    )
+    output = summary[0]["summary_text"]
 
     # Encrypt output
     nonce = get_random_bytes(12)
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    enc_output, tag = aes.encrypt_and_digest(summary.encode("utf-8"))
+    enc_output, tag = aes.encrypt_and_digest(output.encode("utf-8"))
 
     return jsonify(
         {
@@ -79,13 +88,21 @@ async def client_summarize():
 
     # Preprocess and tokenize
     preprocess_text = text.strip().replace("\n", "")
+    input_tokens_length = len(
+        tokenizer.encode(
+            preprocess_text, return_tensors="pt", max_length=512, truncation=True
+        )
+    )
 
     # Summarize
-    summary = summarizer(preprocess_text)
+    summary = summarizer(
+        preprocess_text, max_length=min(input_tokens_length, 130), do_sample=True
+    )
+    output = summary[0]["summary_text"]
 
     return jsonify(
         {
-            "summary": summary,
+            "summary": output,
         }
     )
 
