@@ -9,14 +9,13 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import pipeline
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 MODEL_NAME = os.getenv("MODEL_NAME")
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+summarizer = pipeline("summarization", model=MODEL_NAME)
 
 
 KMS_URL = os.getenv("KMS_URL")
@@ -52,27 +51,16 @@ async def kms_summarize():
     # Decrypt doc
     text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
 
-    # Preprocess and tokenize
+    # Preprocess
     preprocess_text = text.strip().replace("\n", "")
-    t5_prepared_Text = "summarize: " + preprocess_text
-    tokenized_text = tokenizer.encode(
-        t5_prepared_Text, return_tensors="pt", max_length=512, truncation=True
-    )
+
     # Summarize
-    summary_tokens = model.generate(
-        tokenized_text,
-        num_beams=4,
-        no_repeat_ngram_size=2,
-        min_length=30,
-        max_length=200,
-        early_stopping=True,
-    )
-    output = tokenizer.decode(summary_tokens[0], skip_special_tokens=True)
+    summary = summarizer(preprocess_text)
 
     # Encrypt output
     nonce = get_random_bytes(12)
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    enc_output, tag = aes.encrypt_and_digest(output.encode("utf-8"))
+    enc_output, tag = aes.encrypt_and_digest(summary.encode("utf-8"))
 
     return jsonify(
         {
@@ -91,24 +79,13 @@ async def client_summarize():
 
     # Preprocess and tokenize
     preprocess_text = text.strip().replace("\n", "")
-    t5_prepared_Text = "summarize: " + preprocess_text
-    tokenized_text = tokenizer.encode(
-        t5_prepared_Text, return_tensors="pt", max_length=512, truncation=True
-    )
-    # Summarize
-    summary_tokens = model.generate(
-        tokenized_text,
-        num_beams=4,
-        no_repeat_ngram_size=2,
-        min_length=30,
-        max_length=200,
-        early_stopping=True,
-    )
 
-    output = tokenizer.decode(summary_tokens[0], skip_special_tokens=True)
+    # Summarize
+    summary = summarizer(preprocess_text)
+
     return jsonify(
         {
-            "summary": output,
+            "summary": summary,
         }
     )
 
