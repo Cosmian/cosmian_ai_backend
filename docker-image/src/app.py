@@ -57,12 +57,16 @@ async def kms_summarize():
     input_tokens_length = len(
         tokenizer.encode(
             preprocess_text, return_tensors="pt", max_length=512, truncation=True
-        )
+        )[0]
     )
 
     # Summarize
     summary = summarizer(
-        preprocess_text, max_length=min(input_tokens_length, 130), do_sample=True
+        preprocess_text,
+        min_length=min(input_tokens_length, 30),
+        max_length=min(input_tokens_length, 130),
+        do_sample=True,
+        clean_up_tokenization_spaces=True,
     )
     output = summary[0]["summary_text"]
 
@@ -91,12 +95,16 @@ async def client_summarize():
     input_tokens_length = len(
         tokenizer.encode(
             preprocess_text, return_tensors="pt", max_length=512, truncation=True
-        )
+        )[0]
     )
 
     # Summarize
     summary = summarizer(
-        preprocess_text, max_length=min(input_tokens_length, 130), do_sample=True
+        preprocess_text,
+        min_length=min(input_tokens_length, 30),
+        max_length=min(input_tokens_length, 130),
+        do_sample=True,
+        clean_up_tokenization_spaces=True,
     )
     output = summary[0]["summary_text"]
 
