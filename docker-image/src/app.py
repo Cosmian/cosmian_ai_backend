@@ -27,6 +27,26 @@ client = KmsClient(
 )
 
 
+def summarize(text: str, min_summary_length=30, max_summary_length=100) -> str:
+    # Preprocess
+    preprocess_text = text.strip().replace("\n", "")
+    input_tokens_length = len(tokenizer.encode(preprocess_text, return_tensors="pt")[0])
+
+    if input_tokens_length < min_summary_length:
+        raise ValueError("Input text too short to summarize")
+
+    # Summarize
+    output = summarizer(
+        preprocess_text,
+        min_length=min_summary_length,
+        max_length=max_summary_length,
+        do_sample=True,
+        clean_up_tokenization_spaces=True,
+    )
+
+    return output[0]["summary_text"]
+
+
 @app.post("/kms_summarize")
 async def kms_summarize():
     if not "key_id" in request.form:
@@ -44,7 +64,7 @@ async def kms_summarize():
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
 
     if "encrypted_doc" not in request.files:
-        return ("Error: Missing file", 400)
+        return ("Error: Missing file content", 400)
 
     # Read file from client
     ciphertext = request.files["encrypted_doc"].read()
@@ -52,28 +72,15 @@ async def kms_summarize():
     # Decrypt doc
     text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
 
-    # Preprocess
-    preprocess_text = text.strip().replace("\n", "")
-    input_tokens_length = len(
-        tokenizer.encode(
-            preprocess_text, return_tensors="pt", max_length=512, truncation=True
-        )[0]
-    )
-
-    # Summarize
-    summary = summarizer(
-        preprocess_text,
-        min_length=min(input_tokens_length, 30),
-        max_length=min(input_tokens_length, 130),
-        do_sample=True,
-        clean_up_tokenization_spaces=True,
-    )
-    output = summary[0]["summary_text"]
+    try:
+        summary = summarize(text)
+    except ValueError:
+        return ("Error: Input text too short to summarize", 400)
 
     # Encrypt output
     nonce = get_random_bytes(12)
     aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    enc_output, tag = aes.encrypt_and_digest(output.encode("utf-8"))
+    enc_output, tag = aes.encrypt_and_digest(summary.encode("utf-8"))
 
     return jsonify(
         {
@@ -87,30 +94,17 @@ async def kms_summarize():
 async def client_summarize():
     # Get text from client
     if "doc" not in request.form:
-        return ("Error: Missing file", 400)
+        return ("Error: Missing file content", 400)
     text = request.form["doc"]
 
-    # Preprocess and tokenize
-    preprocess_text = text.strip().replace("\n", "")
-    input_tokens_length = len(
-        tokenizer.encode(
-            preprocess_text, return_tensors="pt", max_length=512, truncation=True
-        )[0]
-    )
-
-    # Summarize
-    summary = summarizer(
-        preprocess_text,
-        min_length=min(input_tokens_length, 30),
-        max_length=min(input_tokens_length, 130),
-        do_sample=True,
-        clean_up_tokenization_spaces=True,
-    )
-    output = summary[0]["summary_text"]
+    try:
+        summary = summarize(text)
+    except ValueError:
+        return ("Error: Input text too short to summarize", 400)
 
     return jsonify(
         {
-            "summary": output,
+            "summary": summary,
         }
     )
 
