@@ -42,6 +42,7 @@ def summarize(text: str, min_summary_length=30, max_summary_length=100) -> str:
         max_length=max_summary_length,
         do_sample=True,
         clean_up_tokenization_spaces=True,
+        truncation=True,
     )
 
     return output[0]["summary_text"]
