@@ -15,14 +15,6 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
 cwd_path: Path = Path(__file__).parent.resolve()
-ENCRYPTED_DOC_PATH = cwd_path / "doc.enc"
-KEY_ID = "e06c1896-7b99-47c6-a7f2-69e2052f6e4a"
-
-# read KMS API key from secret file
-SECRETS = json.loads((cwd_path.parent / "secrets.json").read_text(encoding="utf-8"))
-client = KmsClient(
-    "https://developer-example.cosmian.com/kms", api_key=SECRETS["kms_api_key"]
-)
 
 
 def get_certificate(hostname: str, port: int) -> str:
@@ -37,15 +29,11 @@ def get_certificate(hostname: str, port: int) -> str:
             return ssl.DER_cert_to_PEM_cert(bin_cert)
 
 
-def summarize_data(
-    encrypted_doc_path: Path, nonce: bytes, url: str, cert_path: Optional[Path] = None
-):
-    files = {"encrypted_doc": open(encrypted_doc_path, "rb")}
-    data = {"key_id": KEY_ID, "nonce": b64encode(nonce)}
+def summarize_data(doc_path: Path, url: str, cert_path: Optional[Path] = None):
+    data = {"doc": open(doc_path, "rb").read()}
     try:
         response: requests.Response = requests.post(
-            f"{url}/kms_summarize",
-            files=files,
+            f"{url}/summarize",
             data=data,
             verify=cert_path,
         )
@@ -74,22 +62,9 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
         cert_data = get_certificate(hostname, port)
         cert_path.write_bytes(cert_data.encode("utf-8"))
 
-    # Encrypt doc
-    nonce = get_random_bytes(12)
-    key = await client.get_object(KEY_ID)
-    aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    with open(doc_path, "rb") as f:
-        ciphertext, tag = aes.encrypt_and_digest(f.read())
-    with open(ENCRYPTED_DOC_PATH, "wb") as f:
-        f.write(ciphertext + tag)
+    response = summarize_data(Path(doc_path), url, cert_path)["summary"]
 
-    response = summarize_data(ENCRYPTED_DOC_PATH, nonce, url, cert_path)
-
-    ciphertext = b64decode(response["encrypted_summary"])
-    nonce = b64decode(response["nonce"])
-    aes = AES.new(key.key_block(), AES.MODE_GCM, nonce)
-    text = aes.decrypt_and_verify(ciphertext[:-16], ciphertext[-16:]).decode("utf-8")
-    print("Summary:", text)
+    print("Summary:", response)
 
 
 if __name__ == "__main__":
