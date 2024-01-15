@@ -14,4 +14,4 @@ COPY ./src /usr/src/app
 ENV SUMMARY_MODEL facebook/bart-large-cnn
 ENV TRANSLATION_MODEL facebook/nllb-200-distilled-600M
 
-CMD gunicorn --bind 0.0.0.0:5000 wsgi:app
+CMD gunicorn --bind 0.0.0.0:5000 --timeout 600 wsgi:app

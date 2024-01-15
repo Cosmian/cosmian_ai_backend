@@ -11,15 +11,16 @@ def find_separator_index(input_tokens, sep_token, start_index):
     return split_index
 
 
-def end_pad_tokens(input_tokens, length, pad_token, eos_token):
-    input_tokens.extend([pad_token] * (length - len(input_tokens) - 1))
-    input_tokens.append(eos_token)
+def end_pad_tokens(input_tokens, length, pad_token, eos_token=None):
+    if eos_token:
+        input_tokens.append(eos_token)
+    input_tokens.extend([pad_token] * (length - len(input_tokens)))
     assert len(input_tokens) == length
     return input_tokens
 
 
 class Translator(TranslationTool):
-    def __init__(self, chunk_size=500, **kwargs):
+    def __init__(self, chunk_size=100, **kwargs):
         super().__init__(**kwargs)
         self.max_tokens_length = chunk_size
 
@@ -49,10 +50,9 @@ class Translator(TranslationTool):
         # Add last chunk
         chunks.append(
             end_pad_tokens(
-                input_tokens[:split_index],
+                input_tokens,
                 self.max_tokens_length,
                 self.pre_processor.pad_token_id,
-                eos_token,
             )
         )
         return torch.tensor(chunks)
@@ -72,4 +72,4 @@ class Translator(TranslationTool):
         decoded_batch = self.post_processor.batch_decode(
             outputs, skip_special_tokens=True
         )
-        return " ".join(decoded_batch)
+        return "\n".join(decoded_batch)

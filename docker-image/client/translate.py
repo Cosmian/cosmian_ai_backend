@@ -4,15 +4,11 @@ import json
 import socket
 import ssl
 import tempfile
-from base64 import b64decode, b64encode
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
 import requests
-from cosmian_kms import KmsClient
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
 
 cwd_path: Path = Path(__file__).parent.resolve()
 
@@ -69,7 +65,7 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
 
     response = summarize_data(Path(doc_path), url, cert_path)
 
-    print("Summary:", response)
+    print("Response:", response["translation"])
 
 
 if __name__ == "__main__":
