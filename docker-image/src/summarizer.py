@@ -18,10 +18,10 @@ class Summarizer(TextSummarizationTool):
 
         return input_tokens
 
-    def forward(self, inputs):
+    def forward(self, input_tokens):
         return self.model.generate(
-            **inputs,
+            input_tokens,
             min_length=self.min_tokens_length,
             max_length=self.max_tokens_length,
-            do_sample=True
+            do_sample=True,
         )[0]

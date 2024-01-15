@@ -2,8 +2,6 @@ Flask[async]==3.0
 Flask-Cors==4.0
 torch==2.1
 transformers==4.36
-accelerate[torch]==0.25
-tokenizers==0.14
-pycryptodome==3.19
-cosmian-kms==4.9
+accelerate[torch]==0.26
+tokenizers==0.15
 gunicorn==21.2

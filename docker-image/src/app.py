@@ -58,7 +58,7 @@ async def post_translate():
 
     return jsonify(
         {
-            "result": result,
+            "translation": result,
         }
     )
 

@@ -2,7 +2,7 @@
 
 Confidential computing demo on how to use LLMs on GWS encrypted docs
 
-## API routes
+## API endpoints
 
 * `/summarize`
 
@@ -18,7 +18,7 @@ Response:
 
 ```js
 {
-    summarize: "str"
+    summary: "str"
 }
 ```
 
@@ -38,6 +38,6 @@ Response:
 
 ```js
 {
-    result: "str"
+    translation: "str"
 }
 ```
