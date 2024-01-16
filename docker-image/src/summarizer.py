@@ -23,5 +23,5 @@ class Summarizer(TextSummarizationTool):
             input_tokens,
             min_length=self.min_tokens_length,
             max_length=self.max_tokens_length,
-            do_sample=True,
+            do_sample=False,
         )[0]

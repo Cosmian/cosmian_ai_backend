@@ -9,10 +9,10 @@ from translator import Translator
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-SUMMARY_MODEL = os.getenv("SUMMARY_MODEL")
+SUMMARY_MODEL = os.getenv("SUMMARY_MODEL", "facebook/bart-large-cnn")
 summarizer = Summarizer(model=SUMMARY_MODEL)
 
-TRANSLATION_MODEL = os.getenv("TRANSLATION_MODEL")
+TRANSLATION_MODEL = os.getenv("TRANSLATION_MODEL", "facebook/nllb-200-distilled-600M")
 translator = Translator(model=TRANSLATION_MODEL)
 
 
@@ -39,6 +39,7 @@ async def post_summarize():
 @app.post("/translate")
 async def post_translate():
     # TODO: check JWT
+    print("Received request")
 
     if "doc" not in request.form:
         return ("Error: Missing file content", 400)

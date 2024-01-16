@@ -25,9 +25,9 @@ def get_certificate(hostname: str, port: int) -> str:
             return ssl.DER_cert_to_PEM_cert(bin_cert)
 
 
-def summarize_data(doc_path: Path, url: str, cert_path: Optional[Path] = None):
+def translate_data(doc_content: bytes, url: str, cert_path: Optional[Path] = None):
     data = {
-        "doc": open(doc_path, "rb").read(),
+        "doc": doc_content,
         "src_lang": "English",
         "tgt_lang": "French",
     }
@@ -63,7 +63,7 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
         cert_data = get_certificate(hostname, port)
         cert_path.write_bytes(cert_data.encode("utf-8"))
 
-    response = summarize_data(Path(doc_path), url, cert_path)
+    response = translate_data(open(doc_path, "rb").read(), url, cert_path)
 
     print("Response:", response["translation"])
 
