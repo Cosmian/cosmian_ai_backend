@@ -20,7 +20,7 @@ def end_pad_tokens(input_tokens, length, pad_token, eos_token=None):
 
 
 class Translator(TranslationTool):
-    def __init__(self, chunk_size=100, **kwargs):
+    def __init__(self, chunk_size=150, **kwargs):
         super().__init__(**kwargs)
         self.max_tokens_length = chunk_size
 
