@@ -1,6 +1,7 @@
 import threading
 import time
 
+import matplotlib.pyplot as plt
 from summarize import summarize_data
 from translate import translate_data
 
@@ -13,20 +14,20 @@ def timed(func):
     def wrapper(*args, **kwargs):
         start = time.time()
         print("{name:<30} started".format(name=func.__name__))
-        result = func(*args, **kwargs)
-        duration = "{name:<30} finished in {elapsed:.2f} seconds".format(
-            name=func.__name__, elapsed=time.time() - start
+        _ = func(*args, **kwargs)
+        duration = time.time() - start
+        duration_str = "{name:<30} finished in {elapsed:.2f} seconds".format(
+            name=func.__name__, elapsed=duration
         )
-        print(duration)
-        return result
+        print(duration_str)
+        return duration
 
     return wrapper
 
 
 @timed
-def bench_translate(nb_queries=10):
-    content = open("doc.txt", "rb").read()
-    url = "http://127.0.0.1:5000"
+def bench_translate(url, nb_queries=10):
+    content = open("./data/doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -41,9 +42,8 @@ def bench_translate(nb_queries=10):
 
 
 @timed
-def bench_summarize(nb_queries=10):
-    content = open("doc.txt", "rb").read()
-    url = "http://127.0.0.1:5000"
+def bench_summarize(url, nb_queries=10):
+    content = open("./data/doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -58,5 +58,18 @@ def bench_summarize(nb_queries=10):
 
 
 if __name__ == "__main__":
-    bench_translate(5)
-    bench_summarize(10)
+    # url = "https://demo-vm.staging.cosmian.com"
+    url = "http://localhost:5000"
+
+    nb_requests = list(range(1, 10, 2))
+    durations = []
+    for i in nb_requests:
+        durations.append(bench_summarize(url, i))
+
+    plt.scatter(nb_requests, durations)
+    plt.xlabel("Number of requests")
+    plt.ylabel("Response time")
+    plt.title("Summarize")
+    plt.savefig("bench_plot/gunicorn_single-worker_single-thread.jpg")
+
+    # bench_translate(url, 4)
