@@ -1,0 +1,70 @@
+Data anonymization is the process of transforming data in such a way that it can no longer be used to identify individuals without the use of additional information. This is often done to protect the privacy of individuals whose data is being collected or processed.
+
+Anonymization techniques can include removing identifying information such as names and addresses, replacing identifying information with pseudonyms, and aggregating data so that individual data points cannot be distinguished. It's important to note that while anonymization can reduce the risk of re-identification, it is not foolproof and must be used in conjunction with other security measures to fully protect personal data.
+
+Cosmian anonymization provides multiple methods:
+
+- **Hashing**: transforms data into a fixed-length representation that is difficult to reverse and provides a high level of anonymity.
+
+- **Noise Addition**: adds random noise to data in order to preserve privacy. Support various types of noise distributions to `float`, `integer`, and `date`.
+
+- **Word Masking**: hides sensitive words in a text.
+
+- **Word Pattern Masking**: replaces a sensitive pattern in text with specific characters or strings. Supports Regex.
+
+- **Word Tokenization**: removes sensitive words from text by replacing them with tokens.
+
+- **Number Aggregation**: rounds numbers to a desired power of ten. This method is used to reduce the granularity of data and prevent re-identification of individuals.
+
+- **Date Aggregation**: rounds dates based on the specified time unit. This helps to preserve the general time frame of the original data while removing specific details that could potentially identify individuals.
+
+- **Number Scaling**: scales numerical data by a specified factor. This can be useful for anonymizing data while preserving its relative proportions.
+
+
+The `data anonymization` techniques are open-source and written in Rust. For the cryptographic documentation and implementation details, please check its [Github repository](https://github.com/Cosmian/cloudproof_rust/tree/main/crates/anonymization).
+
+Unless low-level programming in Rust, implementers should use those techniques through the various Cloudproof user libraries:
+
+- [cloudproof_java](https://github.com/Cosmian/cloudproof_java): the Cloudproof Java Library,
+- [cloudproof_js](https://github.com/Cosmian/cloudproof_js): the Cloudproof Javascript Library,
+- [cloudproof_python](https://github.com/Cosmian/cloudproof_python): the Cloudproof Python Library,
+- [cloudproof_flutter](https://github.com/Cosmian/cloudproof_flutter): the Cloudproof Flutter Library.
+
+All these libraries are open-source and [available on Github](https://github.com/orgs/Cosmian/repositories?q=cloudproof_)
+
+The user libraries all contain extensive tests, and it is highly recommended to start by hacking those tests.
+
+
+The goal of hashing techniques for data anonymization is to transform sensitive or personally identifiable information (PII) into a fixed-length string of characters, called a hash value, while preserving the privacy and confidentiality of the original data. Hashing is a one-way process, meaning that it is computationally infeasible to reverse-engineer the original data from the hash value.
+
+The supported hashing algorithms are `SHA2`, `SHA3` and `Argon2`:
+
+- SHA-2: SHA-2 consists of multiple hash functions, including SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, and SHA-512/256. These functions use the Merkle-Damgård construction and operate on a block size of 512 bits. They employ different combinations of logical functions, such as bitwise logical operations, modular addition, and logical rotation.
+- SHA-3: SHA-3 is a cryptographic hash function primarily designed for data integrity, digital signatures, and message authentication codes. It takes an input of any length and produces a fixed-length hash value.
+- Argon2: Argon2 is a password hashing function that is specifically designed for secure password storage. It aims to protect against password cracking attacks, such as brute-force and dictionary attacks, by incorporating memory-hardness and resistance to parallel computation.
+
+
+The goal of the Noise Addition technique for data anonymization is to introduce random noise or perturbation to sensitive data to preserve privacy while still allowing for meaningful analysis or processing. Noise addition helps protect the confidentiality of individual records by obscuring specific details while preserving the statistical properties and patterns of the dataset.
+
+Three noise distributions are supported:
+
+- Laplace: The Laplace distribution, also known as the double-exponential distribution, is characterized by its peakedness around the mean and its exponential decay in the tails. It is often used to model data with heavy-tailed or skewed distributions.
+- Gaussian (Normal): The Gaussian distribution, also known as the normal distribution, is a symmetric bell-shaped distribution. It is one of the most widely used distributions in statistics and probability theory, often employed to model data that is normally distributed or approximately so.
+- Uniform: The uniform distribution is a probability distribution where all values within a specified range are equally likely. It forms a rectangle-shaped distribution with a constant probability density function (PDF) over the range.
+
+The `noiser` object needs to be instantiated with a specified distribution and then call the method `apply`.
+
+Either `mean` and `standard deviation` can be specified.
+
+
+The purpose of the Word Masking technique in data anonymization is to protect sensitive information by replacing specific words or terms with more generic or generalized placeholders. This technique is commonly applied to text data, such as documents, emails, or chat logs, where preserving privacy is crucial while maintaining the overall meaning and context of the text.
+
+Word Pattern Masking technique is similar to Word Masking but using a `Regular Expression` (RegEx).
+
+Word tokenization involves splitting a given text or document into its constituent words, and then replace specific sensitive words.
+
+The purpose of the Number Aggregation technique in data anonymization is to group or summarize numerical data to protect individual privacy while preserving the overall statistical properties and trends of the dataset. This technique is commonly applied to datasets containing sensitive numerical information, such as income, age, or medical measurements.
+
+The purpose of the Date Aggregation technique is similar to the Number Aggregation technique.
+
+Data Scaling, also known as feature scaling or normalization, is a preprocessing technique used to standardize or transform numerical data to a common scale. The purpose of Data Scaling is not specifically related to data anonymization but rather to ensure that features or variables have similar ranges or distributions, which can benefit various data analysis and machine learning tasks. It aims to address issues that may arise when variables have different scales or units, which can impact the performance and accuracy of algorithms.

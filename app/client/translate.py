@@ -12,7 +12,6 @@ import requests
 
 cwd_path: Path = Path(__file__).parent.resolve()
 
-
 def get_certificate(hostname: str, port: int) -> str:
     with socket.create_connection((hostname, port)) as sock:
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0.0,<69.0.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "cosmian-confidential-ai"
+authors = [
+    { name = "Cosmian Tech", email = "tech@cosmian.com" },
+]
+description = "Cosmian Confidential AI API"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython"
+]
+dependencies = []
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "__version__" }
+
+[project.scripts]
+cosmian-confidential-ai = "main:main"
