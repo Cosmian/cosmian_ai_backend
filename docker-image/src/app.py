@@ -1,10 +1,13 @@
 import os
 from http import HTTPStatus
 
+import torch
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from summarizer import Summarizer
 from translator import Translator
+
+torch.set_num_threads(os.cpu_count())
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
