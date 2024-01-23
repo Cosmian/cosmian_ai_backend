@@ -5,3 +5,4 @@ transformers==4.36
 accelerate[torch]==0.26
 tokenizers==0.15
 gunicorn==21.2
+google-auth==2.26

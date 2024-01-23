@@ -2,6 +2,7 @@ import os
 from http import HTTPStatus
 
 import torch
+from auth import check_token
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from summarizer import Summarizer
@@ -20,9 +21,8 @@ translator = Translator(model=TRANSLATION_MODEL)
 
 
 @app.post("/summarize")
+@check_token()
 async def post_summarize():
-    # TODO: check JWT
-
     if "doc" not in request.form:
         return ("Error: Missing file content", 400)
     text = request.form["doc"]
@@ -40,10 +40,8 @@ async def post_summarize():
 
 
 @app.post("/translate")
+@check_token()
 async def post_translate():
-    # TODO: check JWT
-    print("Received request")
-
     if "doc" not in request.form:
         return ("Error: Missing file content", 400)
     if "src_lang" not in request.form:

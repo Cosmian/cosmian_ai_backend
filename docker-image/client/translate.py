@@ -26,6 +26,7 @@ def get_certificate(hostname: str, port: int) -> str:
 
 
 def translate_data(doc_content: bytes, url: str, cert_path: Optional[Path] = None):
+    headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {
         "doc": doc_content,
         "src_lang": "English",
@@ -36,6 +37,7 @@ def translate_data(doc_content: bytes, url: str, cert_path: Optional[Path] = Non
         response: requests.Response = requests.post(
             f"{url}/translate",
             data=data,
+            headers=headers,
             verify=cert_path,
         )
     except requests.exceptions.SSLError as e:

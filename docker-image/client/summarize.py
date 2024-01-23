@@ -26,11 +26,13 @@ def get_certificate(hostname: str, port: int) -> str:
 
 
 def summarize_data(doc_content: bytes, url: str, cert_path: Optional[Path] = None):
+    headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {"doc": doc_content}
     try:
         response: requests.Response = requests.post(
             f"{url}/summarize",
             data=data,
+            headers=headers,
             verify=cert_path,
         )
     except requests.exceptions.SSLError as e:
