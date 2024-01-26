@@ -8,13 +8,15 @@ from flask_cors import CORS
 from summarizer import Summarizer
 from translator import Translator
 
-torch.set_num_threads(os.cpu_count())
+torch.set_num_threads(os.cpu_count() or 1)
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 SUMMARY_MODEL = os.getenv("SUMMARY_MODEL", "facebook/bart-large-cnn")
-summarizer = Summarizer(model=SUMMARY_MODEL)
+SUMMARY_TEMPERATURE = float(os.getenv("SUMMARY_TEMPERATURE", "0.5"))
+summarizer = Summarizer(model=SUMMARY_MODEL, temperature=SUMMARY_TEMPERATURE)
+
 
 TRANSLATION_MODEL = os.getenv("TRANSLATION_MODEL", "facebook/nllb-200-distilled-600M")
 translator = Translator(model=TRANSLATION_MODEL)
@@ -29,8 +31,8 @@ async def post_summarize():
 
     try:
         summary = summarizer(text)
-    except ValueError:
-        return ("Error: Input text too short to summarize", 400)
+    except ValueError as e:
+        return (str(e), 400)
 
     return jsonify(
         {

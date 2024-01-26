@@ -2,8 +2,11 @@ from transformers.tools import TextSummarizationTool
 
 
 class Summarizer(TextSummarizationTool):
-    def __init__(self, min_tokens_length=30, max_tokens_length=100, **kwargs):
+    def __init__(
+        self, temperature, min_tokens_length=30, max_tokens_length=100, **kwargs
+    ):
         super().__init__(**kwargs)
+        self.temperature = temperature
         self.min_tokens_length = min_tokens_length
         self.max_tokens_length = max_tokens_length
 
@@ -23,5 +26,6 @@ class Summarizer(TextSummarizationTool):
             input_tokens,
             min_length=self.min_tokens_length,
             max_length=self.max_tokens_length,
-            do_sample=False,
+            do_sample=True,
+            temperature=self.temperature,
         )[0]

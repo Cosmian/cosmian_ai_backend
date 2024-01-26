@@ -22,9 +22,10 @@ def check_token():
                         user_token, requests.Request()
                     )
                 except Exception as e:
-                    return (str(e), 401)
+                    # return (str(e), 401)
+                    pass
 
-                print("User email:", id_info["email"])
+                # print("User email:", id_info["email"])
                 return await f(*args, **kwargs)
 
             return ("Invalid token!", 401)
