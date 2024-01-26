@@ -25,7 +25,7 @@ def get_certificate(hostname: str, port: int) -> str:
             return ssl.DER_cert_to_PEM_cert(bin_cert)
 
 
-def translate_data(doc_content: bytes, url: str, cert_path: Optional[Path] = None):
+def translate_data(doc_content: bytes, url: str, cert_path: Optional[str] = None):
     headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {
         "doc": doc_content,
@@ -57,7 +57,7 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
     parsed_url = urlparse(url)
 
     cert_path: Optional[Path] = None
-    if self_signed_ssl and parsed_url.scheme == "https":
+    if self_signed_ssl and parsed_url.scheme == "https" and parsed_url.hostname:
         hostname = parsed_url.hostname
         port = 443 if parsed_url.port is None else parsed_url.port
 
@@ -65,7 +65,7 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
         cert_data = get_certificate(hostname, port)
         cert_path.write_bytes(cert_data.encode("utf-8"))
 
-    response = translate_data(open(doc_path, "rb").read(), url, cert_path)
+    response = translate_data(open(doc_path, "rb").read(), url, str(cert_path))
 
     print("Response:", response["translation"])
 
