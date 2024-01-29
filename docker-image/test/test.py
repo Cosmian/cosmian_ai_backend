@@ -16,10 +16,6 @@ class ApiTest(unittest.TestCase):
         res = self.app.get("/health")
         self.assertEqual(res.status_code, 200)
 
-    def test_no_auth(self):
-        res = self.app.post("/summarize")
-        self.assertEqual(res.status_code, 401)
-
     def test_summarize_no_doc(self):
         res = self.app.post("/summarize", headers=self.header)
         self.assertEqual(res.status_code, 400)

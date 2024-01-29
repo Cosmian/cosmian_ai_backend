@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 
 from flask import request
@@ -5,11 +6,14 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 
 PREFIX = "Bearer "
+AUTH_IP = os.getenv("AUTH_IP")
 
 
-# Authentication decorator
 def check_token():
     def decorator(f):
+        if AUTH_IP is None:
+            return f
+
         @wraps(f)
         async def wrapper(*args, **kwargs):
             if "Authorization" in request.headers:
