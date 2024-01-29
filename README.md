@@ -2,46 +2,28 @@
 
 Confidential computing demo on how to use LLMs on GWS encrypted docs
 
-## API routes
+## API endpoints
 
-* `/kms_summarize`
-
-Input
-
-```js
-multipart
-form: {
-    key_id: "str",
-    nonce: "base64",
-}
-
-file: "encrypted_doc"
-```
-
-Output
-
-```js
-{
-    encrypted_summary: "base64",
-    nonce: "base64",
-}
-```
-
-* `/client_summarize`
+`/summarize`
 
 Request:
 
-```js
-
-form: {
-    doc: "str",
-}
-```
+* `doc`: content of the document to summarize (String)
 
 Response:
 
-```js
-{
-    summarize: "str"
-}
-```
+* `summary`: result (String)
+
+`/translate`
+
+Request:
+
+* `doc`: content of the document to translate (String)
+
+* `src_lang`: source language of the text to summarize (String),
+
+* `tgt_lang`: desired output language (String),
+
+Response:
+
+* `translation`: result (String)

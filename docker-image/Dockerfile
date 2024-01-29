@@ -11,8 +11,7 @@ RUN pip install -r requirements.txt
 
 COPY ./src /usr/src/app
 
-ENV MODEL_NAME facebook/bart-large-cnn
-ENV KMS_URL https://kms.url
-ENV KMS_API_KEY XXXX
+ENV SUMMARY_MODEL facebook/bart-large-cnn
+ENV TRANSLATION_MODEL facebook/nllb-200-distilled-600M
 
-CMD gunicorn --bind 0.0.0.0:5000 wsgi:app
+CMD gunicorn --bind 0.0.0.0:5000 --timeout 600 wsgi:app
