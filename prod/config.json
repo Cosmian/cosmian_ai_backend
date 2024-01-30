@@ -1,0 +1,21 @@
+{
+    "auth": {
+        "openid_configs": [
+            {
+                "client_id": "OUfH4FuzDAW99Ck2d9Rb7ROziOZEalIH",
+                "jwks_uri": "https://cse-test.eu.auth0.com/.well-known/jwks.json"
+            },
+            {
+                "client_id": "996739510374-au9fdbgp72dacrsag267ckg32jf3d3e2.apps.googleusercontent.com",
+                "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs"
+            }
+        ]
+    },
+    "summary": {
+        "model": "facebook/bart-large-cnn",
+        "temperature": "0.5"
+    },
+    "translation": {
+        "model": "facebook/nllb-200-distilled-600M"
+    }
+}

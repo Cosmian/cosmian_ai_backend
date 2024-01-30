@@ -6,5 +6,5 @@ services:
     restart: always
     ports:
       - "5002:5000"
-    env_file:
-      - config.env
+    volumes:
+      - ${PWD}/config.json:/usr/app/config.json

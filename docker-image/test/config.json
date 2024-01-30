@@ -1,0 +1,9 @@
+{
+    "summary": {
+        "model": "facebook/bart-large-cnn",
+        "temperature": "0.5"
+    },
+    "translation": {
+        "model": "facebook/nllb-200-distilled-600M"
+    }
+}

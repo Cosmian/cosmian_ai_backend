@@ -1,8 +1,11 @@
+import json
 import os
 from http import HTTPStatus
+from pathlib import Path
 
 import torch
 from auth import check_token
+from config import AppConfig
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from summarizer import Summarizer
@@ -13,13 +16,14 @@ torch.set_num_threads(os.cpu_count() or 1)
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-SUMMARY_MODEL = os.getenv("SUMMARY_MODEL", "facebook/bart-large-cnn")
-SUMMARY_TEMPERATURE = float(os.getenv("SUMMARY_TEMPERATURE", "0.5"))
-summarizer = Summarizer(model=SUMMARY_MODEL, temperature=SUMMARY_TEMPERATURE)
+with open("config.json") as f:
+    app_config = AppConfig.load(f)
 
-
-TRANSLATION_MODEL = os.getenv("TRANSLATION_MODEL", "facebook/nllb-200-distilled-600M")
-translator = Translator(model=TRANSLATION_MODEL)
+summarizer = Summarizer(
+    model=app_config["summary"]["model"],
+    temperature=float(app_config["summary"]["temperature"]),
+)
+translator = Translator(model=app_config["translation"]["model"])
 
 
 @app.post("/summarize")
