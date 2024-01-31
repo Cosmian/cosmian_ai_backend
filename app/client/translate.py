@@ -29,9 +29,8 @@ def translate_data(doc_content: bytes, url: str, cert_path: Optional[str] = None
     data = {
         "doc": doc_content,
         "src_lang": "en",
-        "tgt_lang": "zh",
+        "tgt_lang": "fr",
     }
-
     try:
         response: requests.Response = requests.post(
             f"{url}/translate",

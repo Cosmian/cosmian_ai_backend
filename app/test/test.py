@@ -56,7 +56,7 @@ class ApiTest(unittest.TestCase):
     def test_translate(self):
         res = self.app.post(
             "/translate",
-            data={"doc": "Hello", "src_lang": "English", "tgt_lang": "French"},
+            data={"doc": "Hello", "src_lang": "en", "tgt_lang": "fr"},
             headers=self.header,
         )
         self.assertEqual(res.status_code, 200)
