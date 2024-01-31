@@ -29,8 +29,8 @@ def translate_data(doc_content: bytes, url: str, cert_path: Optional[str] = None
     headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {
         "doc": doc_content,
-        "src_lang": "English",
-        "tgt_lang": "French",
+        "src_lang": "en",
+        "tgt_lang": "zh",
     }
 
     try:

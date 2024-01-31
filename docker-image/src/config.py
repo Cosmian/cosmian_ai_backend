@@ -1,12 +1,12 @@
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, TextIO
 
 
 class AppConfig:
     _config: Optional[Dict] = None
 
     @classmethod
-    def load(cls, config_file) -> Dict:
+    def load(cls, config_file: TextIO) -> Dict:
         cls._config = json.load(config_file)
         return cls.get()
 
