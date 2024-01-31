@@ -19,10 +19,55 @@ def end_pad_tokens(input_tokens, length, pad_token, eos_token=None):
     return input_tokens
 
 
+# ISO 639 language codes based on `https://en.wikipedia.org/wiki/Languages_used_on_the_Internet`
+LANGUAGE_CODES = {
+    "ar": "arb_Arab",
+    "bg": "bul_Cyrl",
+    "ca": "cat_Latn",
+    "cs": "ces_Latn",
+    "da": "dan_Latn",
+    "de": "deu_Latn",
+    "el": "ell_Grek",
+    "en": "eng_Latn",
+    "es": "spa_Latn",
+    "et": "est_Latn",
+    "fa": "pes_Arab",
+    "fi": "fin_Latn",
+    "fr": "fra_Latn",
+    "he": "heb_Hebr",
+    "hi": "hin_Deva",
+    "hr": "hrv_Latn",
+    "hu": "hun_Latn",
+    "id": "ind_Latn",
+    "it": "ita_Latn",
+    "ja": "jpn_Jpan",
+    "ko": "kor_Hang",
+    "lt": "lit_Latn",
+    "lv": "lvs_Latn",
+    "nb": "nno_Latn",
+    "nl": "nld_Latn",
+    "nn": "nob_Latn",
+    "pl": "pol_Latn",
+    "pt": "por_Latn",
+    "ro": "ron_Latn",
+    "ru": "rus_Cyrl",
+    "sk": "slk_Latn",
+    "sl": "slv_Latn",
+    "sr": "srp_Cyrl",
+    "sv": "swe_Latn",
+    "th": "tha_Thai",
+    "tr": "tur_Latn",
+    "uk": "ukr_Cyrl",
+    "vi": "vie_Latn",
+    "zh": "zho_Hans",
+}
+
+
 class Translator(TranslationTool):
     def __init__(self, chunk_size=150, **kwargs):
         super().__init__(**kwargs)
         self.max_tokens_length = chunk_size
+        self.lang_to_code = LANGUAGE_CODES
 
     def split_chunks(self, input_tokens, bos_token, eos_token):
         if len(input_tokens) <= self.max_tokens_length:
