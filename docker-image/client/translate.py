@@ -55,17 +55,7 @@ def translate_data(doc_content: bytes, url: str, cert_path: Optional[str] = None
 
 async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
     parsed_url = urlparse(url)
-
-    cert_path: Optional[Path] = None
-    if self_signed_ssl and parsed_url.scheme == "https" and parsed_url.hostname:
-        hostname = parsed_url.hostname
-        port = 443 if parsed_url.port is None else parsed_url.port
-
-        cert_path = Path(tempfile.gettempdir()) / f"{hostname}.pem"
-        cert_data = get_certificate(hostname, port)
-        cert_path.write_bytes(cert_data.encode("utf-8"))
-
-    response = translate_data(open(doc_path, "rb").read(), url, str(cert_path))
+    response = translate_data(open(doc_path, "rb").read(), url)
 
     print("Response:", response["translation"])
 

@@ -16,7 +16,7 @@ def verify_token(id_token: str, openid_configs: Dict):
         try:
             # try matching the user token with the current jwks
             signing_key = jwks_client.get_signing_key(header["kid"])
-        except:
+        except Exception as e:
             # try next jwks
             continue
         else:
@@ -27,7 +27,8 @@ def verify_token(id_token: str, openid_configs: Dict):
                 algorithms=header["alg"],
                 audience=conf["client_id"],
             )
-            return data["email_verified"]
+            # return decoded token
+            return data
 
     raise jwt.PyJWKClientError("Invalid token: Unable to find a matching signing key")
 
@@ -46,10 +47,8 @@ def check_token():
                     return ("Error: Bearer not found", 401)
                 id_token = bearer_token[len(PREFIX) :]
                 try:
-                    if verify_token(id_token, auth_config["openid_configs"]):
-                        return await f(*args, **kwargs)
-                    else:
-                        return ("Error: Invalid token", 401)
+                    _ = verify_token(id_token, auth_config["openid_configs"])
+                    return await f(*args, **kwargs)
                 except Exception as e:
                     return (f"Error: {e}", 401)
 

@@ -1,6 +1,5 @@
 import os
 from http import HTTPStatus
-from pathlib import Path
 
 import torch
 from auth import check_token

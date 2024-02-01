@@ -8,6 +8,10 @@
             {
                 "client_id": "996739510374-au9fdbgp72dacrsag267ckg32jf3d3e2.apps.googleusercontent.com",
                 "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs"
+            },
+            {
+                "client_id": "f2e7b8f2-8d29-4239-9f6c-1c35516d571b",
+                "jwks_uri": "https://login.microsoftonline.com/0388f871-53ca-4599-b1f4-642974299c20/discovery/v2.0/keys"
             }
         ]
     },
