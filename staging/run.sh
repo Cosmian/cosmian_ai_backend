@@ -1,4 +1,3 @@
 #!/bin/bash
 
-export $(cat config.env | xargs)
-cosmian-confidential-ai
+nohup cosmian-confidential-ai 5001 &

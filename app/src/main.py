@@ -1,13 +1,21 @@
+import argparse
 import asyncio
 
-from app import app_asgi
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 
+from app import app_asgi
+
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-p", "--port", type=int, default=5000, help="The listening port"
+    )
+    args = parser.parse_args()
+
     config_map = {
-        "bind": "0.0.0.0:5000",
+        "bind": f"0.0.0.0:{args.port}",
         "alpn_protocols": ["h2"],
         "workers": 1,
         "accesslog": "-",
