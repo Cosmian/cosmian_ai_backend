@@ -59,7 +59,7 @@ def bench_summarize(url, nb_queries=10):
 
 if __name__ == "__main__":
     # url = "https://demo-vm.staging.cosmian.com"
-    url = "http://localhost:5000"
+    url = "http://localhost:5001"
 
     nb_requests = list(range(1, 10, 2))
     durations = []
@@ -70,6 +70,5 @@ if __name__ == "__main__":
     plt.xlabel("Number of requests")
     plt.ylabel("Response time")
     plt.title("Summarize")
-    plt.savefig("bench_plot/gunicorn_single-worker_single-thread.jpg")
+    plt.savefig("bench_plot/amx/summarize_avx512.jpg")
 
-    # bench_translate(url, 4)
