@@ -1,8 +1,8 @@
 Flask[async]==3.0
 Flask-Cors==4.0
 hypercorn==0.16
---extra-index-url https://download.pytorch.org/whl/cpu
 argparse==1.4
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.1
 transformers==4.36
 accelerate[torch]==0.26
