@@ -1,6 +1,7 @@
 import os
 from http import HTTPStatus
 
+from asgiref.wsgi import WsgiToAsgi
 import torch
 from auth import check_token
 from config import AppConfig
@@ -12,6 +13,7 @@ from translator import Translator
 torch.set_num_threads(os.cpu_count() or 1)
 
 app = Flask(__name__)
+app_asgi = WsgiToAsgi(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 with open("config.json") as f:
