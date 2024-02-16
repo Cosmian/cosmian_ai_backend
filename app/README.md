@@ -9,6 +9,8 @@ pip install dist/*.wheel
 
 ## Run app
 
+Be sure to have `~/.local/bin` in your `PATH`
+
 ```sh
 cosmian-confidential-ai
 ```
