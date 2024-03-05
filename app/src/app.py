@@ -1,8 +1,9 @@
 import os
 from http import HTTPStatus
+from typing import Dict
 
-from asgiref.wsgi import WsgiToAsgi
 import torch
+from asgiref.wsgi import WsgiToAsgi
 from auth import check_token
 from config import AppConfig
 from flask import Flask, Response, jsonify, request
@@ -19,11 +20,11 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 with open("config.json") as f:
     app_config = AppConfig.load(f)
 
-summarizer = Summarizer(
-    model=app_config["summary"]["model"],
-    temperature=float(app_config["summary"]["temperature"]),
-)
-translator = Translator(model=app_config["translation"]["model"])
+summarizer_by_lang: Dict[str, Summarizer] = {
+    lang: Summarizer(**model_config)
+    for lang, model_config in app_config["summary"].items()
+}
+translator = Translator(**app_config["translation"])
 
 
 @app.post("/summarize")
@@ -31,9 +32,12 @@ translator = Translator(model=app_config["translation"]["model"])
 async def post_summarize():
     if "doc" not in request.form:
         return ("Error: Missing file content", 400)
+
     text = request.form["doc"]
+    src_lang = request.form.get("src_lang", default="default")
 
     try:
+        summarizer = summarizer_by_lang.get(src_lang, summarizer_by_lang["default"])
         summary = summarizer(text)
     except ValueError as e:
         return (str(e), 400)

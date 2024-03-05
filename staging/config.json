@@ -1,9 +1,13 @@
 {
     "summary": {
-        "model": "facebook/bart-large-cnn",
-        "temperature": "0.5"
+        "en":  {
+            "model_name": "facebook/bart-large-cnn"
+        },
+        "default": {
+            "model_name": "Falconsai/text_summarization"
+        }
     },
     "translation": {
-        "model": "facebook/nllb-200-distilled-600M"
+        "model_name": "facebook/nllb-200-distilled-600M"
     }
 }

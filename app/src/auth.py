@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Dict
+from typing import Any, Dict, List
 
 import jwt
 from config import AppConfig
@@ -8,7 +8,7 @@ from flask import request
 PREFIX = "Bearer "
 
 
-def verify_token(id_token: str, openid_configs: Dict):
+def verify_token(id_token: str, openid_configs: List[Dict]) -> Any:
     header = jwt.get_unverified_header(id_token)
     for conf in openid_configs:
         jwks_client = jwt.PyJWKClient(conf["jwks_uri"])
