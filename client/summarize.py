@@ -2,14 +2,13 @@ import argparse
 import asyncio
 import json
 from pathlib import Path
-from typing import Optional
 
 import requests
 
 cwd_path: Path = Path(__file__).parent.resolve()
 
 
-def summarize_data(doc_content: bytes, url: str, cert_path: Optional[str] = None):
+def summarize_data(doc_content: bytes, url: str):
     headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {"doc": doc_content}
     try:
@@ -17,7 +16,6 @@ def summarize_data(doc_content: bytes, url: str, cert_path: Optional[str] = None
             f"{url}/summarize",
             data=data,
             headers=headers,
-            verify=cert_path,
         )
     except requests.exceptions.SSLError as e:
         raise Exception(

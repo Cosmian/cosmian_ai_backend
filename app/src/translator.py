@@ -1,5 +1,8 @@
+from typing import List
+
 import torch
-from transformers.tools import TranslationTool
+from model_pipeline import ModelPipeline
+from transformers import AutoModelForSeq2SeqLM, PreTrainedTokenizer
 
 
 def find_separator_index(input_tokens, sep_token, start_index):
@@ -63,58 +66,82 @@ LANGUAGE_CODES = {
 }
 
 
-class Translator(TranslationTool):
-    def __init__(self, chunk_size=150, **kwargs):
-        super().__init__(**kwargs)
-        self.max_tokens_length = chunk_size
+class Translator(ModelPipeline):
+    model_class = AutoModelForSeq2SeqLM
+
+    def __init__(self, model_name: str, tokens_chunk_size=150):
+        self.tokens_chunk_size = tokens_chunk_size
         self.lang_to_code = LANGUAGE_CODES
+        self.model_name = model_name
 
-    def split_chunks(self, input_tokens, bos_token, eos_token):
-        if len(input_tokens) <= self.max_tokens_length:
-            return torch.tensor([input_tokens])
+    def encode(self, _: str):
+        raise ValueError("Missing parameters `src_lang` and `tgt_lang`")
 
-        sep_token = self.pre_processor.encode(".", add_special_tokens=False)[0]
+    def encode(self, text: str, src_lang, tgt_lang):
+        if src_lang not in self.lang_to_code:
+            raise ValueError(f"{src_lang} is not a supported language.")
+        if tgt_lang not in self.lang_to_code:
+            raise ValueError(f"{tgt_lang} is not a supported language.")
+        src_lang = self.lang_to_code[src_lang]
+        tgt_lang = self.lang_to_code[tgt_lang]
 
-        chunks = []
-        # Split at the previous `sep` closer to `max_tokens_length`
-        while len(input_tokens) > self.max_tokens_length:
-            split_index = find_separator_index(
-                input_tokens, sep_token, self.max_tokens_length - 1
-            )
-            chunks.append(
-                end_pad_tokens(
-                    input_tokens[:split_index],
-                    self.max_tokens_length,
-                    self.pre_processor.pad_token_id,
-                    eos_token,
-                )
-            )
-            input_tokens = input_tokens[split_index:]
-            input_tokens[0] = bos_token
-
-        # Add last chunk
-        chunks.append(
-            end_pad_tokens(
-                input_tokens,
-                self.max_tokens_length,
-                self.pre_processor.pad_token_id,
-            )
+        return self.tokenizer._build_translation_inputs(
+            text, return_tensors="pt", src_lang=src_lang, tgt_lang=tgt_lang
         )
-        return torch.tensor(chunks)
 
     def forward(self, inputs):
         input_tokens = inputs["input_ids"][0].tolist()
-        bos_token = input_tokens[0]
-        eos_token = input_tokens[-1]
-
-        input_ids = self.split_chunks(input_tokens, bos_token, eos_token)
+        input_ids = split_chunks(input_tokens, self.tokens_chunk_size, self.tokenizer)
 
         return self.model.generate(
             input_ids, forced_bos_token_id=inputs["forced_bos_token_id"]
         )
 
     def decode(self, outputs):
-        decoded_batch = self.post_processor.batch_decode(
-            outputs, skip_special_tokens=True
-        )
+        decoded_batch = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
         return "\n".join(decoded_batch)
+
+
+def split_chunks(
+    input_tokens: List[int], max_tokens_length: int, tokenizer: PreTrainedTokenizer
+):
+    """Cut the input tokens in multiple chunks of `max_tokens_length`
+    This methods tries to find a `separator token` (like '.') to avoid cutting
+    at the middle of a phrase which would lead to poor translation.
+
+    Returns:
+        one or more padded list of tokens
+    """
+    if len(input_tokens) <= max_tokens_length:
+        return torch.tensor([input_tokens])
+
+    sep_token = tokenizer.encode(".", add_special_tokens=False)[0]
+    bos_token = input_tokens[0]
+    eos_token = input_tokens[-1]
+
+    chunks = []
+    # Split at the previous `sep` closer to `max_tokens_length`
+    while len(input_tokens) > max_tokens_length:
+        split_index = find_separator_index(
+            input_tokens, sep_token, max_tokens_length - 1
+        )
+        chunks.append(
+            end_pad_tokens(
+                input_tokens[:split_index],
+                max_tokens_length,
+                tokenizer.pad_token_id,
+                eos_token,
+            )
+        )
+        input_tokens = input_tokens[split_index:]
+        input_tokens[0] = bos_token
+
+    # Add last chunk
+    chunks.append(
+        end_pad_tokens(
+            input_tokens,
+            max_tokens_length,
+            tokenizer.pad_token_id,
+        )
+    )
+    return torch.tensor(chunks)
