@@ -5,12 +5,13 @@ from typing import Dict
 
 import torch
 from asgiref.wsgi import WsgiToAsgi
-from auth import check_token
-from config import AppConfig
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-from summarizer import Summarizer
-from translator import Translator
+
+from .auth import check_token
+from .config import AppConfig
+from .summarizer import Summarizer
+from .translator import Translator
 
 torch.set_num_threads(os.cpu_count() or 1)
 

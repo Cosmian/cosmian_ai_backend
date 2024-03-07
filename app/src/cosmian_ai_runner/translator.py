@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from typing import Dict, List
 
 import torch
-from model_pipeline import ModelPipeline
 from transformers import AutoModelForSeq2SeqLM, PreTrainedTokenizer
+
+from .model_pipeline import ModelPipeline
 
 # ISO 639 language codes based on `https://en.wikipedia.org/wiki/Languages_used_on_the_Internet`
 LANGUAGE_CODES = {
@@ -55,9 +57,6 @@ class Translator(ModelPipeline):
         self.generation_config = generation_config
         self.lang_to_code = LANGUAGE_CODES
         self.model_name = model_name
-
-    def encode(self, _: str):
-        raise ValueError("Missing parameters `src_lang` and `tgt_lang`")
 
     def encode(self, text: str, src_lang, tgt_lang):
         if src_lang not in self.lang_to_code:

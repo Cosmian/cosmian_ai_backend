@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import argparse
 import asyncio
 
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 
-from app import app_asgi
+from .app import app_asgi
 
 
 def main():

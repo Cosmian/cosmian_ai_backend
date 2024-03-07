@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from app import app
+from cosmian_ai_runner.app import app
 
 
 class ApiTest(unittest.TestCase):

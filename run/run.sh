@@ -1,3 +1,3 @@
 #!/bin/bash
 
-nohup cosmian-confidential-ai -p 5001 &
+nohup cosmian-ai-runner -p 5001 &

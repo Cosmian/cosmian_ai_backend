@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "cosmian-confidential-ai"
+name = "cosmian-ai-runner"
 authors = [
     { name = "Cosmian Tech", email = "tech@cosmian.com" },
 ]
@@ -19,11 +19,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: Implementation :: CPython"
 ]
-dynamic = ["dependencies", "version"]
+dependencies = []
+dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-version = { attr = "__version__" }
+version = { attr = "cosmian_ai_runner.__version__" }
 
 [project.scripts]
-cosmian-confidential-ai = "main:main"
+cosmian-ai-runner = "cosmian_ai_runner.main:main"
