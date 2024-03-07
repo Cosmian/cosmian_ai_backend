@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import asyncio
 import json
@@ -9,15 +10,13 @@ cwd_path: Path = Path(__file__).parent.resolve()
 
 
 def summarize_data(doc_content: bytes, url: str):
-    headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {"doc": doc_content}
     try:
         response: requests.Response = requests.post(
             f"{url}/summarize",
             data=data,
-            headers=headers,
         )
-    except requests.exceptions.SSLError as e:
+    except requests.exceptions.SSLError:
         raise Exception(
             f"Bad response from server: {response.status_code} {response.text}"
         )

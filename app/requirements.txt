@@ -1,12 +1,12 @@
-Flask[async]==3.0
-Flask-Cors==4.0
-hypercorn==0.16
-argparse==1.4
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.1
-transformers==4.36
-accelerate[torch]==0.26
-tokenizers==0.15
-gunicorn==21.2
+accelerate[torch]==0.27
+argparse==1.4
 cryptography==42.0
+Flask-Cors==4.0
+Flask[async]==3.0
+gunicorn==21.2
+hypercorn==0.16
 PyJWT==2.8
+tokenizers==0.15
+torch==2.2
+transformers==4.38

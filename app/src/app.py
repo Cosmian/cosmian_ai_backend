@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from http import HTTPStatus
 from typing import Dict
@@ -17,7 +18,8 @@ app = Flask(__name__)
 app_asgi = WsgiToAsgi(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-with open("config.json") as f:
+config_path = os.getenv("CONFIG_PATH", "config.json")
+with open(config_path) as f:
     app_config = AppConfig.load(f)
 
 summarizer_by_lang: Dict[str, Summarizer] = {

@@ -1,20 +1,22 @@
-# demo-cse-cc
+# Cosmian AI backend
 
-Confidential computing demo on how to use LLMs on GWS encrypted docs
+Confidential computing backend to run language models
 
 ## Usage
 
-* Build python [app](./app/README.md)
+- Build and install the [app](./app/README.md)
 
-* Run app in `./staging` or `./prod`
+- Edit the config file ([more info](./app/README.md#config-file))
+
+- Run the app
 
 ```bash
-./run.sh
+CONFIG_PATH="./run/config.json" cosmian-confidential-ai --port 5001
 ```
 
-* Create a `supervisord` service:
+- Create a `supervisord` service:
 
-Sample config file: [./staging/cosmian_confidential_ai.conf](./staging/cosmian_confidential_ai.conf)
+Sample config file: [./run/cosmian_confidential_ai.conf](./run/cosmian_confidential_ai.conf)
 
 ## API endpoints
 
@@ -22,22 +24,22 @@ Sample config file: [./staging/cosmian_confidential_ai.conf](./staging/cosmian_c
 
 Request:
 
-* `doc`: content of the document to summarize (String)
+- `doc`: content of the document to summarize (String)
 
 Response:
 
-* `summary`: result (String)
+- `summary`: result (String)
 
 `/translate`
 
 Request:
 
-* `doc`: content of the document to translate (String)
+- `doc`: content of the document to translate (String)
 
-* `src_lang`: source language of the text to summarize (String),
+- `src_lang`: source language of the text to summarize (String),
 
-* `tgt_lang`: desired output language (String),
+- `tgt_lang`: desired output language (String),
 
 Response:
 
-* `translation`: result (String)
+- `translation`: result (String)

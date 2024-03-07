@@ -12,14 +12,26 @@
             {
                 "client_id": "f2e7b8f2-8d29-4239-9f6c-1c35516d571b",
                 "jwks_uri": "https://login.microsoftonline.com/0388f871-53ca-4599-b1f4-642974299c20/discovery/v2.0/keys"
+            },
+            {
+                "client_id": "GC8Ar4YXV7mgNQSq8AUgMxIidm6a6uxP",
+                "jwks_uri": "https://interactive-tutorial.eu.auth0.com/.well-known/jwks.json"
             }
         ]
     },
     "summary": {
-        "model": "facebook/bart-large-cnn",
-        "temperature": "0.5"
+        "default":  {
+            "model_name": "facebook/bart-large-cnn",
+            "generation_config": {
+                "max_length": 140,
+                "min_length": 30
+            }
+        }
     },
     "translation": {
-        "model": "facebook/nllb-200-distilled-600M"
+        "model_name": "facebook/nllb-200-distilled-600M",
+        "generation_config": {
+            "max_length": 200
+        }
     }
 }
