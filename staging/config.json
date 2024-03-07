@@ -1,13 +1,25 @@
 {
     "summary": {
         "en":  {
-            "model_name": "facebook/bart-large-cnn"
+            "model_name": "facebook/bart-large-cnn",
+            "generation_config": {
+                "max_length": 140,
+                "min_length": 30
+            }
         },
         "default": {
-            "model_name": "Falconsai/text_summarization"
+            "model_name": "Falconsai/text_summarization",
+            "prefix": "summarize: ",
+            "generation_config": {
+                "max_length": 140,
+                "min_length": 30
+            }
         }
     },
     "translation": {
-        "model_name": "facebook/nllb-200-distilled-600M"
+        "model_name": "facebook/nllb-200-distilled-600M",
+        "generation_config": {
+            "max_length": 200
+        }
     }
 }

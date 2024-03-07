@@ -10,7 +10,6 @@ class ApiTest(unittest.TestCase):
     def setUp(self):
         app.testing = True
         self.app = app.test_client()
-        self.header = {"Authorization": "Bearer JWT_TOKEN"}
 
     def test_health(self):
         res = self.app.get("/health")
