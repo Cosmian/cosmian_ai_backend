@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from functools import wraps
 from typing import Any, Dict, List
 
 import jwt
-from config import AppConfig
 from flask import request
+
+from .config import AppConfig
 
 PREFIX = "Bearer "
 
@@ -16,7 +18,7 @@ def verify_token(id_token: str, openid_configs: List[Dict]) -> Any:
         try:
             # try matching the user token with the current jwks
             signing_key = jwks_client.get_signing_key(header["kid"])
-        except Exception as e:
+        except Exception:
             # try next jwks
             continue
         else:
@@ -45,7 +47,8 @@ def check_token():
                 bearer_token = request.headers["Authorization"]
                 if not bearer_token.startswith(PREFIX):
                     return ("Error: Bearer not found", 401)
-                id_token = bearer_token[len(PREFIX) :]
+                prefix_len = len(PREFIX)
+                id_token = bearer_token[prefix_len:]
                 try:
                     _ = verify_token(id_token, auth_config["openid_configs"])
                     return await f(*args, **kwargs)

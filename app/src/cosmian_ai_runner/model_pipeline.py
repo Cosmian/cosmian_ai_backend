@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Based on [Transformer Tools](https://github.com/huggingface/transformers/tree/main/src/transformers/tools)
 
 from abc import ABC, abstractmethod
@@ -14,7 +15,7 @@ class ModelPipeline(ABC):
     _tokenizer = None
 
     @abstractmethod
-    def encode(self, text: str) -> Any:
+    def encode(self, text: str, *args, **kwargs) -> Any:
         """Check, pre-process and tokenize the input"""
 
     @abstractmethod

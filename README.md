@@ -11,12 +11,12 @@ Confidential computing backend to run language models
 - Run the app
 
 ```bash
-CONFIG_PATH="./run/config.json" cosmian-confidential-ai --port 5001
+CONFIG_PATH="./run/config.json" cosmian-ai-runner --port 5001
 ```
 
 - Create a `supervisord` service:
 
-Sample config file: [./run/cosmian_confidential_ai.conf](./run/cosmian_confidential_ai.conf)
+Sample config file: [./run/cosmian-ai-backend.conf](./run/cosmian-ai-backend.conf)
 
 ## API endpoints
 

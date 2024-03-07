@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from typing import Dict
 
-from model_pipeline import ModelPipeline
 from transformers import AutoModelForSeq2SeqLM
+
+from .model_pipeline import ModelPipeline
 
 
 class Summarizer(ModelPipeline):
