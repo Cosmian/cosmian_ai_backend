@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0.0,<69.0.0"]
+requires = ["setuptools>=69.0.0,<70.0.0"]
 build-backend = "setuptools.build_meta"
 
 
@@ -19,10 +19,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: Implementation :: CPython"
 ]
-dependencies = []
-dynamic = ["version"]
+dynamic = ["dependencies", "version"]
 
 [tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 version = { attr = "__version__" }
 
 [project.scripts]

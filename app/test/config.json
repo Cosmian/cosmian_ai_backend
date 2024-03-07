@@ -1,9 +1,17 @@
 {
     "summary": {
-        "model": "facebook/bart-large-cnn",
-        "temperature": "0.5"
+        "default":  {
+            "model_name": "facebook/bart-large-cnn",
+            "generation_config": {
+                "max_length": 140,
+                "min_length": 30
+            }
+        }
     },
     "translation": {
-        "model": "facebook/nllb-200-distilled-600M"
+        "model_name": "facebook/nllb-200-distilled-600M",
+        "generation_config": {
+            "max_length": 200
+        }
     }
 }

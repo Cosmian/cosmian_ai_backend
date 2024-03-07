@@ -1,11 +1,8 @@
+# -*- coding: utf-8 -*-
 import argparse
 import asyncio
 import json
-import socket
-import ssl
 from pathlib import Path
-from typing import Optional
-from urllib.parse import urlparse
 
 import requests
 
@@ -13,7 +10,6 @@ cwd_path: Path = Path(__file__).parent.resolve()
 
 
 def translate_data(doc_content: bytes, url: str):
-    headers = {"Authorization": "Bearer JWT_TOKEN"}
     data = {
         "doc": doc_content,
         "src_lang": "en",
@@ -23,9 +19,8 @@ def translate_data(doc_content: bytes, url: str):
         response: requests.Response = requests.post(
             f"{url}/translate",
             data=data,
-            headers=headers,
         )
-    except requests.exceptions.SSLError as e:
+    except requests.exceptions.SSLError:
         raise Exception(
             f"Bad response from server: {response.status_code} {response.text}"
         )
