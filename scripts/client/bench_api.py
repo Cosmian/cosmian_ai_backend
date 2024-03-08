@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import threading
 import time
 
@@ -27,7 +28,7 @@ def timed(func):
 
 @timed
 def bench_translate(url, nb_queries=10):
-    content = open("./data/doc.txt", "rb").read()
+    content = open("../sample_data/sample_en_doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -43,7 +44,7 @@ def bench_translate(url, nb_queries=10):
 
 @timed
 def bench_summarize(url, nb_queries=10):
-    content = open("./data/doc.txt", "rb").read()
+    content = open("../sample_data/sample_en_doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -70,5 +71,4 @@ if __name__ == "__main__":
     plt.xlabel("Number of requests")
     plt.ylabel("Response time")
     plt.title("Summarize")
-    plt.savefig("bench_plot/amx/summarize_avx512.jpg")
-
+    plt.savefig("../bench_plot/amx/summarize_avx512.jpg")

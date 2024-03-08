@@ -1,4 +1,4 @@
-# Cosmian AI backend
+# Cosmian AI Backend
 
 Confidential computing backend to run language models
 
@@ -34,11 +34,11 @@ Response:
 
 Request:
 
-- `doc`: content of the document to translate (String)
+- `doc`: content of the document to translate (String),
 
 - `src_lang`: source language of the text to summarize (String),
 
-- `tgt_lang`: desired output language (String),
+- `tgt_lang`: desired output language (String)
 
 Response:
 
