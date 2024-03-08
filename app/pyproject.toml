@@ -19,11 +19,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: Implementation :: CPython"
 ]
-dependencies = []
-dynamic = ["version"]
+dynamic = ["version", "dependencies"]
 
 [tool.setuptools.dynamic]
 version = { attr = "cosmian_ai_runner.__version__" }
+dependencies = { file = "requirements.txt" }
 
 [project.scripts]
 cosmian-ai-runner = "cosmian_ai_runner.main:main"
