@@ -12,14 +12,16 @@ class Summarizer(ModelPipeline):
     def __init__(
         self,
         model_name: str,
-        prefix: str = "",
         generation_config: Dict = {},
     ):
         super().__init__()
 
         self.model_name = model_name
-        self.prefix = prefix
-        self.generation_config = generation_config
+        # prefix to use before the document to summarize
+        self.prefix = generation_config.get("prefix", "")
+        self.generation_config = {
+            k: v for k, v in generation_config.items() if k != "prefix"
+        }
 
     def encode(self, text):
         """Additional checks on the size of the input"""

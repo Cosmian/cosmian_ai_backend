@@ -39,6 +39,7 @@ class ModelPipeline(ABC):
         return self._tokenizer
 
     def __call__(self, *args, **kwargs) -> str:
+        # TODO: move data to device
         encoded_inputs = self.encode(*args, **kwargs)
         # encoded_inputs = send_to_device(encoded_inputs, self.device)
         outputs = self.forward(encoded_inputs)

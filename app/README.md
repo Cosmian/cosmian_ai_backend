@@ -2,17 +2,26 @@
 
 API to run a language model in a confidential VM
 
+## Install dependencies
+
+By default all dependencies will be installed with the app.
+If you don't need CUDA support, you can save space by installing PyTorch for CPU only:
+
+```sh
+pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+```
+
 ## Build and install the app
 
 ```sh
 python -m build
-pip install dist/*.wheel
+pip install dist/*.whl
 ```
 
 ## Test it
 
 ```sh
-CONFIG_PATH="test/config.json" python test/test.py
+CONFIG_PATH="./tests/config.json" python tests/test.py
 ```
 
 ## Run the API
@@ -20,7 +29,7 @@ CONFIG_PATH="test/config.json" python test/test.py
 Be sure to have `~/.local/bin` in your `PATH`
 
 ```sh
-cosmian-confidential-ai
+CONFIG_PATH="./tests/config.json" cosmian-ai-runner
 ```
 
 ## Config file
