@@ -2,7 +2,7 @@
 from typing import Dict, List
 
 import torch
-from transformers import AutoModelForSeq2SeqLM, PreTrainedTokenizer
+from transformers import PreTrainedTokenizer
 
 from .model_pipeline import ModelPipeline
 
@@ -51,7 +51,6 @@ LANGUAGE_CODES = {
 
 
 class Translator(ModelPipeline):
-    model_class = AutoModelForSeq2SeqLM
 
     def __init__(self, model_name: str, generation_config: Dict = {}):
         self.generation_config = generation_config

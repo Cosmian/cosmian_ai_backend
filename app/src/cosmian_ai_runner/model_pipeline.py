@@ -4,12 +4,16 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from transformers import AutoTokenizer
+import torch
+from accelerate.utils import send_to_device
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
 class ModelPipeline(ABC):
-    model_class = None
+    model_class = AutoModelForSeq2SeqLM
     tokenizer_class = AutoTokenizer
+    # Use GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Lazy init to save memory
     _model = None
     _tokenizer = None
@@ -29,7 +33,9 @@ class ModelPipeline(ABC):
     @property
     def model(self):
         if self._model is None:
-            self._model = self.model_class.from_pretrained(self.model_name)
+            self._model = self.model_class.from_pretrained(self.model_name).to(
+                self.device
+            )
         return self._model
 
     @property
@@ -39,11 +45,14 @@ class ModelPipeline(ABC):
         return self._tokenizer
 
     def __call__(self, *args, **kwargs) -> str:
-        # TODO: move data to device
         encoded_inputs = self.encode(*args, **kwargs)
-        # encoded_inputs = send_to_device(encoded_inputs, self.device)
+        # move inputs to the same device as the model
+        encoded_inputs = send_to_device(encoded_inputs, self.device)
+
         outputs = self.forward(encoded_inputs)
-        # outputs = send_to_device(outputs, "cpu")
+        # move the results back to CPU
+        outputs = send_to_device(outputs, "cpu")
+
         decoded_outputs = self.decode(outputs)
 
         return decoded_outputs

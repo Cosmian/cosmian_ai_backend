@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Dict
 
-from transformers import AutoModelForSeq2SeqLM
-
 from .model_pipeline import ModelPipeline
 
 
 class Summarizer(ModelPipeline):
-    model_class = AutoModelForSeq2SeqLM
 
     def __init__(
         self,
@@ -17,7 +14,7 @@ class Summarizer(ModelPipeline):
         super().__init__()
 
         self.model_name = model_name
-        # prefix to use before the document to summarize
+        # optional prefix to use before the document to summarize
         self.prefix = generation_config.get("prefix", "")
         self.generation_config = {
             k: v for k, v in generation_config.items() if k != "prefix"
