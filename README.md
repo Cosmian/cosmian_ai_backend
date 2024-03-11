@@ -1,4 +1,4 @@
-# Cosmian AI backend
+# Cosmian AI Backend
 
 Confidential computing backend to run language models
 
@@ -24,7 +24,9 @@ Sample config file: [./run/cosmian-ai-backend.conf](./run/cosmian-ai-backend.con
 
 Request:
 
-- `doc`: content of the document to summarize (String)
+- `doc`: content of the document to summarize (String),
+
+- `src_lang`: **optional** source language of the text to summarize (String)
 
 Response:
 
@@ -34,11 +36,11 @@ Response:
 
 Request:
 
-- `doc`: content of the document to translate (String)
+- `doc`: content of the document to translate (String),
 
-- `src_lang`: source language of the text to summarize (String),
+- `src_lang`: source language of the text to translate (String),
 
-- `tgt_lang`: desired output language (String),
+- `tgt_lang`: desired output language (String)
 
 Response:
 

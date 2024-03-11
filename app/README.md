@@ -24,7 +24,7 @@ pip install dist/*.whl
 CONFIG_PATH="./tests/config.json" python tests/test.py
 ```
 
-## Run the API
+## Serve the API
 
 Be sure to have `~/.local/bin` in your `PATH`
 
