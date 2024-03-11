@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import argparse
 import threading
 import time
 
 import matplotlib.pyplot as plt
-from summarize import summarize_data
-from translate import translate_data
+from client.summarize import summarize_data
+from client.translate import translate_data
 
 
 def timed(func):
@@ -28,7 +29,7 @@ def timed(func):
 
 @timed
 def bench_translate(url, nb_queries=10):
-    content = open("../sample_data/sample_en_doc.txt", "rb").read()
+    content = open("sample_data/sample_en_doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -44,7 +45,7 @@ def bench_translate(url, nb_queries=10):
 
 @timed
 def bench_summarize(url, nb_queries=10):
-    content = open("../sample_data/sample_en_doc.txt", "rb").read()
+    content = open("sample_data/sample_en_doc.txt", "rb").read()
 
     print(f"Sending {nb_queries} queries of {len(content)} bytes")
 
@@ -58,17 +59,37 @@ def bench_summarize(url, nb_queries=10):
         t.join()
 
 
-if __name__ == "__main__":
-    # url = "https://demo-vm.staging.cosmian.com"
-    url = "http://localhost:5001"
+def main(url: str, translate=False, save_plot=None):
+
+    f = bench_translate if translate else bench_summarize
 
     nb_requests = list(range(1, 10, 2))
     durations = []
     for i in nb_requests:
-        durations.append(bench_summarize(url, i))
+        durations.append(f(url, i))
 
-    plt.scatter(nb_requests, durations)
-    plt.xlabel("Number of requests")
-    plt.ylabel("Response time")
-    plt.title("Summarize")
-    plt.savefig("../bench_plot/amx/summarize_avx512.jpg")
+    if save_plot:
+        plt.scatter(nb_requests, durations)
+        plt.xlabel("Number of requests")
+        plt.ylabel("Response time")
+        plt.title("Translate" if translate else "Summarize")
+        plt.savefig(save_plot)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("url", type=str, help="URL of the API to benchmark.")
+    parser.add_argument(
+        "--translate",
+        type=bool,
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Benchmark translation (default summarize)",
+    )
+    parser.add_argument(
+        "--save-plot", type=str, default=None, help="Where to save the bench plot"
+    )
+
+    args = parser.parse_args()
+
+    main(args.url, args.translate, args.save_plot)
