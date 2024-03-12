@@ -14,8 +14,26 @@ See [./client](./client) for instructions.
 
 ## Benchmark
 
-- `bench_inference.py`: measure inference time where it is executed
+### `bench_inference.py`
 
-- [`client/bench_api.py`](./client/README.md)
+Directly measure inference time on the machine it is executed.
 
-- `bench_plots`: query time plot using `bench_api.py`
+```bash
+python bench_inference.py sample_data/sample_en_doc.txt [-n 2] [--verbose]
+```
+
+### `bench_api.py`
+
+Measure and plots the responses time of the requests to the API.
+
+```bash
+python bench_api.py URL [--translate] [--save-plot "./bench_plots/plot_name.jpg"]
+```
+
+- `bench_plots`
+
+### Query time plots using `bench_api.py`
+
+- `inference` different hardware: CPU, CPU with AMX, CUDA
+
+- `web_server`: try parallelizing the request processing, at the end we are still limited by the text generation using all computing capabilities (maybe useful in the future with multiple GPUs)
