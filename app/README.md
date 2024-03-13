@@ -5,11 +5,14 @@ API to run a language model in a confidential VM
 ## Install dependencies
 
 By default all dependencies will be installed with the app.
-If you don't need CUDA support, you can save space by installing PyTorch for CPU only:
+
+- If you don't need CUDA support, you can save space by installing PyTorch for CPU only
 
 ```sh
 pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 ```
+
+- To use Intel AMX extensions, install `optimum[openvino]==1.17`
 
 ## Build and install the app
 

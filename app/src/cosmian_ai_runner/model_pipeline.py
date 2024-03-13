@@ -8,18 +8,25 @@ import torch
 from accelerate.utils import send_to_device
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
+# Install OpenVINO backend to use Intel AMX
+use_optimum = True
+try:
+    from optimum.intel.openvino import OVModelForSeq2SeqLM
+except ImportError:
+    use_optimum = False
+
 
 class ModelPipeline(ABC):
-    model_class = AutoModelForSeq2SeqLM
-    tokenizer_class = AutoTokenizer
     # Use GPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() and not use_optimum else "cpu"
+    )
     # Lazy init to save memory
     _model = None
     _tokenizer = None
 
     @abstractmethod
-    def encode(self, text: str, *args, **kwargs) -> Any:
+    def encode(self, text: str, **kwargs) -> Any:
         """Check, pre-process and tokenize the input"""
 
     @abstractmethod
@@ -33,15 +40,20 @@ class ModelPipeline(ABC):
     @property
     def model(self):
         if self._model is None:
-            self._model = self.model_class.from_pretrained(self.model_name).to(
-                self.device
-            )
+            if use_optimum:
+                self._model = OVModelForSeq2SeqLM.from_pretrained(
+                    self.model_name, export=True
+                )
+            else:
+                self._model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name).to(
+                    self.device
+                )
         return self._model
 
     @property
     def tokenizer(self):
         if self._tokenizer is None:
-            self._tokenizer = self.tokenizer_class.from_pretrained(self.model_name)
+            self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         return self._tokenizer
 
     def __call__(self, *args, **kwargs) -> str:

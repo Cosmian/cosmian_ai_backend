@@ -57,9 +57,11 @@ class Translator(ModelPipeline):
         self.lang_to_code = LANGUAGE_CODES
         self.model_name = model_name
 
-    def encode(self, text: str, src_lang, tgt_lang):
+    def encode(self, text: str, **kwargs):
+        src_lang = kwargs.get("src_lang")
         if src_lang not in self.lang_to_code:
             raise ValueError(f"{src_lang} is not a supported language.")
+        tgt_lang = kwargs.get("tgt_lang")
         if tgt_lang not in self.lang_to_code:
             raise ValueError(f"{tgt_lang} is not a supported language.")
         src_lang = self.lang_to_code[src_lang]
