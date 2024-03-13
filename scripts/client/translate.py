@@ -39,7 +39,7 @@ async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data provider example.")
     parser.add_argument("url", type=str, help="URL of the secure API")
-    parser.add_argument("doc", type=str, help="The document to summarize")
+    parser.add_argument("doc", type=str, help="The document to process")
 
     try:
         args = parser.parse_args()

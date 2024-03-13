@@ -9,10 +9,13 @@ import requests
 cwd_path: Path = Path(__file__).parent.resolve()
 
 
-def summarize_data(doc_content: bytes, url: str):
-    data = {"doc": doc_content, "src_lang": "en"}
+def extract_keywords(doc_content: bytes, url: str):
+    data = {"doc": doc_content}
     try:
-        response: requests.Response = requests.post(f"{url}/summarize", data=data)
+        response: requests.Response = requests.post(
+            f"{url}/extract",
+            data=data,
+        )
     except requests.exceptions.SSLError:
         raise Exception(
             f"Bad response from server: {response.status_code} {response.text}"
@@ -27,9 +30,9 @@ def summarize_data(doc_content: bytes, url: str):
 
 
 async def main(url: str, doc_path: str, self_signed_ssl: bool = False):
-    response = summarize_data(open(doc_path, "rb").read(), url)
+    response = extract_keywords(open(doc_path, "rb").read(), url)
 
-    print("Response:", response["summary"])
+    print("Response:", response)
 
 
 if __name__ == "__main__":

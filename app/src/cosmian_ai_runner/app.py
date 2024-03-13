@@ -10,6 +10,7 @@ from flask_cors import CORS
 
 from .auth import check_token
 from .config import AppConfig
+from .keyword_extractor import KeywordExtractor
 from .summarizer import Summarizer
 from .translator import Translator
 
@@ -28,6 +29,7 @@ summarizer_by_lang: Dict[str, Summarizer] = {
     for lang, model_config in app_config["summary"].items()
 }
 translator = Translator(**app_config["translation"])
+kw_extractor = KeywordExtractor(model_name="all-MiniLM-L6-v2")
 
 
 @app.post("/summarize")
@@ -74,6 +76,26 @@ async def post_translate():
     return jsonify(
         {
             "translation": result,
+        }
+    )
+
+
+@app.post("/extract")
+@check_token()
+async def post_extract():
+    if "doc" not in request.form:
+        return ("Error: Missing file content", 400)
+
+    text = request.form["doc"]
+
+    try:
+        keywords = kw_extractor(text)
+    except ValueError as e:
+        return (str(e), 400)
+
+    return jsonify(
+        {
+            "keywords": keywords,
         }
     )
 
