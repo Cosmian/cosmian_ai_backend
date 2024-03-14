@@ -29,7 +29,7 @@ summarizer_by_lang: Dict[str, Summarizer] = {
     for lang, model_config in app_config["summary"].items()
 }
 translator = Translator(**app_config["translation"])
-kw_extractor = KeywordExtractor(model_name="all-MiniLM-L6-v2")
+kw_extractor = KeywordExtractor(**app_config["keyword_extraction"])
 
 
 @app.post("/summarize")
@@ -87,9 +87,10 @@ async def post_extract():
         return ("Error: Missing file content", 400)
 
     text = request.form["doc"]
+    src_lang = request.form.get("src_lang", default="default")
 
     try:
-        keywords = kw_extractor(text)
+        keywords = kw_extractor(text, src_lang)
     except ValueError as e:
         return (str(e), 400)
 

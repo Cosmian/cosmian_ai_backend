@@ -10,7 +10,7 @@ cwd_path: Path = Path(__file__).parent.resolve()
 
 
 def extract_keywords(doc_content: bytes, url: str):
-    data = {"doc": doc_content}
+    data = {"doc": doc_content, "src_lang": "en"}
     try:
         response: requests.Response = requests.post(
             f"{url}/extract",

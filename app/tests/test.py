@@ -55,6 +55,11 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn("translation", res.json)
 
+    def test_keyword_extraction(self):
+        res = self.app.post("/extract", data={"doc": "Hello world", "src_lang": "en"})
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("keywords", res.json)
+
 
 if __name__ == "__main__":
     unittest.main()

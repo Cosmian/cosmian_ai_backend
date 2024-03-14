@@ -9,7 +9,6 @@ keybert~=0.8.4
 PyJWT~=2.8.0
 sentence-transformers~=2.5.1
 spacy~=3.7.4
-spacy-langdetect~=0.1.2
 tokenizers~=0.15.2
 torch~=2.2.1
 transformers~=4.38.2
