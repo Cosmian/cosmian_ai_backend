@@ -45,3 +45,15 @@ Request:
 Response:
 
 - `translation`: result (String)
+
+`/extract`
+
+Request:
+
+- `doc`: content of the document to extract keywords from (String),
+
+- `src_lang`: **optional** source language of the input text (String)
+
+Response:
+
+- `keywords`: list of keywords ([String])
