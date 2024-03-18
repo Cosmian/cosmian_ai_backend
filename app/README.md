@@ -11,6 +11,12 @@ If you don't need CUDA support, you can save space by installing PyTorch for CPU
 pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 ```
 
+To use Intel AVX/AMX extensions:
+
+```sh
+pip install intel-extension-for-pytorch
+```
+
 ## Build and install the app
 
 ```sh

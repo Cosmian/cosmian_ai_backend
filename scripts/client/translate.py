@@ -16,10 +16,7 @@ def translate_data(doc_content: bytes, url: str):
         "tgt_lang": "fr",
     }
     try:
-        response: requests.Response = requests.post(
-            f"{url}/translate",
-            data=data,
-        )
+        response: requests.Response = requests.post(f"{url}/translate", data=data)
     except requests.exceptions.SSLError:
         raise Exception(
             f"Bad response from server: {response.status_code} {response.text}"
