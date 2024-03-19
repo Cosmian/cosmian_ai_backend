@@ -1,24 +1,4 @@
 {
-    "auth": {
-        "openid_configs": [
-            {
-                "client_id": "OUfH4FuzDAW99Ck2d9Rb7ROziOZEalIH",
-                "jwks_uri": "https://cse-test.eu.auth0.com/.well-known/jwks.json"
-            },
-            {
-                "client_id": "996739510374-au9fdbgp72dacrsag267ckg32jf3d3e2.apps.googleusercontent.com",
-                "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs"
-            },
-            {
-                "client_id": "f2e7b8f2-8d29-4239-9f6c-1c35516d571b",
-                "jwks_uri": "https://login.microsoftonline.com/0388f871-53ca-4599-b1f4-642974299c20/discovery/v2.0/keys"
-            },
-            {
-                "client_id": "GC8Ar4YXV7mgNQSq8AUgMxIidm6a6uxP",
-                "jwks_uri": "https://interactive-tutorial.eu.auth0.com/.well-known/jwks.json"
-            }
-        ]
-    },
     "summary": {
         "default":  {
             "model_name": "facebook/bart-large-cnn",
