@@ -61,4 +61,4 @@ class KeywordExtractor:
         tokenized_keywords = self.get_nlp_pipeline(language)(keywords_text)
 
         # remove duplicates and short words
-        return list({token.lemma_ for token in tokenized_keywords})
+        return list({token.lemma_.lower() for token in tokenized_keywords})
