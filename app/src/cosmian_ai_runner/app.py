@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 from http import HTTPStatus
 from typing import Dict
@@ -10,6 +11,7 @@ from flask_cors import CORS
 
 from .auth import check_token
 from .config import AppConfig
+from .keyword_extractor import KeywordExtractor
 from .summarizer import Summarizer
 from .translator import Translator
 
@@ -28,6 +30,7 @@ summarizer_by_lang: Dict[str, Summarizer] = {
     for lang, model_config in app_config["summary"].items()
 }
 translator = Translator(**app_config["translation"])
+kw_extractor = KeywordExtractor(**app_config["keyword_extraction"])
 
 
 @app.post("/summarize")
@@ -74,6 +77,48 @@ async def post_translate():
     return jsonify(
         {
             "translation": result,
+        }
+    )
+
+
+@app.post("/extract")
+@check_token()
+async def post_extract():
+    if "doc" not in request.form:
+        return ("Error: Missing file content", 400)
+
+    text = request.form["doc"]
+    src_lang = request.form.get("src_lang", default="default")
+
+    try:
+        keywords = kw_extractor(text, src_lang)
+    except ValueError as e:
+        return (str(e), 400)
+
+    return jsonify(
+        {
+            "keywords": keywords,
+        }
+    )
+
+
+@app.post("/index")
+@check_token()
+async def post_index():
+    if "keywords" not in request.form:
+        return ("Error: Missing keywords", 400)
+
+    user_keywords = json.loads(request.form["keywords"])
+    src_lang = request.form.get("src_lang", default="default")
+
+    try:
+        keywords = kw_extractor.lemmatize(user_keywords, src_lang)
+    except ValueError as e:
+        return (str(e), 400)
+
+    return jsonify(
+        {
+            "keywords": keywords,
         }
     )
 

@@ -20,7 +20,7 @@ Sample config file: [./run/cosmian-ai-backend.conf](./run/cosmian-ai-backend.con
 
 ## API endpoints
 
-`/summarize`
+### `/summarize`
 
 Request:
 
@@ -32,7 +32,7 @@ Response:
 
 - `summary`: result (String)
 
-`/translate`
+### `/translate`
 
 Request:
 
@@ -45,3 +45,25 @@ Request:
 Response:
 
 - `translation`: result (String)
+
+### `/extract`
+
+Request:
+
+- `doc`: content of the document to extract keywords from (String),
+
+- `src_lang`: **optional** source language of the input text (String)
+
+Response:
+
+- `keywords`: list of keywords ([String])
+
+### `/index`
+
+Request:
+
+- `keywords`: JSON list of keywords chosen by the user ([String]),
+
+- `src_lang`: **optional** source language of the input text (String)
+
+Response: TBD

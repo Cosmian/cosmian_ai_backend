@@ -96,6 +96,10 @@ We recommend to use `facebook/nllb-200-distilled-600M` (600M parameters).
     "generation_config": {
       "max_length": 200
     }
+  },
+  "keyword_extraction": {
+    "model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "nb_keywords": 10
   }
 }
 ```
