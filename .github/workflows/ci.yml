@@ -71,10 +71,10 @@
       name: package.cosmian.com
       runs-on: [self-hosted, no-tee]
       steps:
-        - name: Download binaries
+        - name: Download artifact
           uses: actions/download-artifact@v4
           with:
-            name: cosmian_ai_backend
+            name: cosmian_ai_backend_dist
   
         - name: Push latest build to package.cosmian.com
           run: |
