@@ -77,6 +77,8 @@
           with:
             name: cosmian_ai_backend_dist
             path: ./dist
+        
+        - run: find .
   
         - name: Push latest build to package.cosmian.com
           run: |
