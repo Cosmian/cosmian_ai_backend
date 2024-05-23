@@ -81,8 +81,7 @@
         - name: Push latest build to package.cosmian.com
           run: |
             set -x
-            export BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-            DESTINATION_DIR=/mnt/package/cosmian-ai-runner/last_build/${BRANCH}
+            DESTINATION_DIR=/mnt/package/cosmian-ai-runner/last_build
             ssh cosmian@package.cosmian.com mkdir -p $DESTINATION_DIR
             scp ./dist/cosmian_ai_runner-0.3.0-py3-none-any.whl ./dist/cosmian_ai_runner-0.3.0.tar.gz cosmian@package.cosmian.com:$DESTINATION_DIR/
   
