@@ -39,31 +39,31 @@ summarizer_by_lang: Dict[str, Summarizer] = {
 }
 translator = Translator(**APP_CONFIG["translation"])
 
-model_values = {}
-data_list = AppConfig.get_models_config()
+database_values = {}
+data_list = AppConfig.get_databases_config()
 if data_list is not None and len(data_list) > 0:
     for item in data_list:
-        model_id = item.get("model_id")
-        file = item.get("file")
-        prompt = item.get("prompt")
-        task = item.get("task")
-        kwargs = item.get("kwargs")
+        name = item.get("name")
+
+        model_config = item.get("model")
+        model_id = model_config.get("model_id")
+        file = model_config.get("file")
+        prompt = model_config.get("prompt")
+        task = model_config.get("task")
+        kwargs = model_config.get("kwargs")
         model_value = ModelValue(model_id, file, prompt, task, kwargs)
-        model_values[model_id] = model_value
 
-element = AppConfig.get_sentence_transformer_config()
-if element:
-    file = element.get("file")
-    score_threshold = element.get("score_threshold")
-    sentence_transformer = STValue(file, score_threshold)
+        sentence_transformer_config = item.get("sentence_transformer")
+        file = sentence_transformer_config.get("file")
+        score_threshold = sentence_transformer_config.get("score_threshold")
+        sentence_transformer = STValue(file, score_threshold)
+        RAG = Rag(sentence_transformer=sentence_transformer)
 
-    print(f"Using sentence transformer: {sentence_transformer.file}")
-
-    RAG = Rag(sentence_transformer=sentence_transformer)
-    print("RAG created.")
-else:
-    RAG = None
-    print("No sentence tranformer configured, RAG is not created.")
+        database_values[name] = {
+            "model" : model_value,
+            "rag": RAG,
+            "references": []
+        }
 
 # sources = [
 #     "data/Victor_Hugo_Notre-Dame_De_Paris_en.epub",
@@ -140,58 +140,21 @@ def health_check():
     return Response(response="OK", status=HTTPStatus.OK)
 
 
-@app.post("/predict")
+@app.get("/databases")
 @check_token()
-async def make_predictionl():
+async def list_databases():
     """
-    Make a prediction using the selected model.
-    Expects 'text' and 'model' in form data.
-    Returns a JSON response with the model's prediction.
+    List all the configured RAG.
+    Returns a JSON response with the list of RAG.
     """
-    if "text" not in request.form:
-        return ("Error: Missing text content", 400)
-    if "model" not in request.form:
-        return ("Error: Missing selected model", 400)
-
-    text = request.form["text"]
-    model_name = request.form["model"]
-
-    if is_gpu_available():
-        print("GPU is available.")
-
-    # Choose the model
-    if model_name:
-        try:
-            model = model_values[model_name]
-        except KeyError as e:
-            return (f"Error model not found: {e}", 404)
-    else:
-        return Exception("Error model not found", 404)
-
-    print(f"Using LLM: {model.model_id}")
-    try:
-        llm = LLM(model=model)
-        print("LLM created.")
-        response = llm.invoke({"text": text})
-        return jsonify(
-            {
-                "response": response,
-            }
-        )
-    except Exception as e:
-        return (f"Error during prediction: {e}", 400)
-
-
-@app.get("/models")
-@check_token()
-async def list_models():
-    """
-    List all the configured models.
-    Returns a JSON response with the list of models.
-    """
+    names = list(database_values.keys())
+    databases = {}
+    for name in names:
+        references = database_values[name]['references']
+        databases[name] = references
     return jsonify(
         {
-            "models": data_list,
+            "databases": databases,
         }
     )
 
@@ -201,30 +164,30 @@ async def list_models():
 async def build_rag():
     """
     Make a prediction using the loaded RAG.
-    Expects 'text' and 'model' in form data.
+    Expects 'text' and 'database' in form data.
     Returns a JSON response with the RAG prediction.
     """
-    if RAG is None:
-        return ("RAG is not created - fobidden request", 404)
     if "text" not in request.form:
         return ("Error: Missing text content", 400)
-    if "model" not in request.form:
-        return ("Error: Missing selected model", 400)
+    if "database" not in request.form:
+        return ("Error: Missing selected database", 400)
 
     query = request.form["text"]
-    model_name = request.form["model"]
+    database_name = request.form["database"]
+
 
     if is_gpu_available():
         print("GPU is available.")
 
     # Choose the model
-    if model_name:
+    if database_name:
         try:
-            model = model_values[model_name]
+            model = database_values[database_name]["model"]
+            RAG = database_values[database_name]["rag"]
         except KeyError as e:
-            return (f"Error model not found: {e}", 404)
+            return (f"Error model/RAG not found: {e}", 404)
     else:
-        return Exception("Error model not found", 404)
+        return Exception("Error model/RAG not found", 404)
 
     print(f"Using LLM: {model.model_id}")
     try:
@@ -246,19 +209,23 @@ async def add_doc():
     Expects a file with '.epub' extension in form data.
     Returns a success message or error.
     """
-    if RAG is None:
-        return ("RAG is not created - fobidden request", 404)
+    if "database" not in request.form:
+        return ("Error: Missing selected database", 400)
     if not os.path.exists("data"):
         os.makedirs("data")
     if "file" not in request.files:
         return jsonify({"Error": "No file part"}), 400
+    if "reference" not in request.form:
+        return ("Error: Missing reference", 400)
 
     file = request.files["file"]
+    database_name = request.form["database"]
+    reference = request.form["reference"]
 
     if file.filename == "":
         return jsonify({"Error": "No selected file"}), 400
 
-    if file and file.filename.endswith(".epub"):
+    if file and file.filename.endswith(".epub") and database_name:
         file_ext = os.path.splitext(file.filename)[1]
         with tempfile.NamedTemporaryFile(
             dir="data", suffix=file_ext, delete=False
@@ -267,7 +234,9 @@ async def add_doc():
             file.save(temp_file_name)
 
         try:
-            RAG.add_document(temp_file_name)
+            RAG = database_values[database_name]["rag"]
+            RAG.add_document(temp_file_name, reference)
+            database_values[database_name]["references"].append(reference)
             return ("File successfully processed", 200)
         except Exception as e:
             return (f"Error adding file: {e}", 400)

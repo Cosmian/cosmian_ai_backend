@@ -44,13 +44,13 @@ class Rag:
             max_results=max_results,
         )
 
-    def add_document(self, document_path: str):
+    def add_document(self, document_path: str, reference: str):
         """
         Add a document to the vector database.
         Args:
             document_path (str): The path to the document to add.
         """
-        self.db.insert(document_path)
+        self.db.insert(document_path, reference)
 
     def invoke(
         self, model: ModelValue, query: str, config: Optional[RunnableConfig] = None

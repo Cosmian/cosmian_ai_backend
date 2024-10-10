@@ -81,7 +81,7 @@ class VectorDB(VectorStore):
         self._splitter = CharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap
         )
-        self._db = FAISS.from_texts(["dummy"], self._embeddings)
+        self._db = FAISS.from_texts(["empty"], self._embeddings)
 
     @property
     def embeddings(self) -> Optional[Embeddings]:
@@ -165,10 +165,13 @@ class VectorDB(VectorStore):
             max_results=self._max_results,
         )
 
-    def insert(self, document_path: str):
+    def insert(self, document_path: str, reference: str):
         """Insert a document into the vector store."""
         document = __load_document__(document_path)
         chunks = self._splitter.split_documents([document])
+        documents_with_metadata = []
+        for _doc in chunks:
+            _doc.metadata['reference'] = reference
         self._db.add_documents(chunks)
 
 

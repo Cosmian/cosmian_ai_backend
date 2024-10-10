@@ -144,6 +144,10 @@ class LLM(LLMChain):
         if "context" in input_args:
             documents: list[Document] = input_args["context"]
             text = " ".join([doc.page_content for doc in documents])
+            context = [{
+                "content": doc.page_content,
+                "metadata": {k: v for k, v in doc.metadata.items() if k != 'source'}
+            } for doc in documents]
             has_scores = len(documents) > 0 and all(
                 doc.metadata.get("score") is not None for doc in documents
             )
@@ -161,7 +165,7 @@ class LLM(LLMChain):
             text = input_args["text"]
         else:
             raise ValueError("Missing text argument.")
-        output = super().invoke({"text": text}, config, **kwargs)
+        output = super().invoke({"text": text, "context": context}, config, **kwargs)
         if average_score is not None:
             output["score"] = average_score
         return output

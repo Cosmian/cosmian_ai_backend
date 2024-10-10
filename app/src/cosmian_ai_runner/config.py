@@ -57,25 +57,13 @@ class AppConfig:
         return None
 
     @classmethod
-    def get_models_config(cls) -> Optional[list]:
+    def get_databases_config(cls) -> Optional[list]:
         """
         Get the models configuration.
         Returns:
             Optional[list]: The models configuration if available, otherwise None.
         """
         config = cls.get()
-        if "models" in config:
-            return config["models"]
-        return None
-
-    @classmethod
-    def get_sentence_transformer_config(cls) -> Optional[list]:
-        """
-        Get the sentence transformer configuration.
-        Returns:
-            Optional[list]: The sentence transformer configuration if available, otherwise None.
-        """
-        config = cls.get()
-        if "sentence_transformer" in config:
-            return config["sentence_transformer"]
+        if "databases" in config:
+            return config["databases"]
         return None
