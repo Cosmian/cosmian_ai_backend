@@ -87,7 +87,6 @@ def __load_hf_model__(model_id: str, task: str, kwargs) -> BaseLLM:
         )
     else:
         raise ValueError(f"Got invalid task {task}, ")
-    # model.to(device)
     pipe = pipeline(task, model=model, tokenizer=tokenizer, **kwargs)
     base_llm = HuggingFacePipeline(pipeline=pipe)
     return base_llm
@@ -102,12 +101,12 @@ def __load_hf_gguf_model__(model_id: str, model_file: str, config) -> BaseLLM:
     """
     try:
         base_llm = CTransformers(model=model_id, model_file=model_file, config=config)
-        if is_gpu_available:
+        if is_gpu_available():
             accelerator = Accelerator()
             base_llm, config = accelerator.prepare(base_llm, config)
         return base_llm
     except Exception as e:
-        print("Error", e)
+        raise RuntimeError(f"Error: {e}") from e
 
 
 class LLM(LLMChain):
@@ -173,11 +172,14 @@ class LLM(LLMChain):
                     average_score = int((average_score + 10) * 10)
             elif len(documents) == 0:
                 average_score = 0
+            output = super().invoke(
+                {"text": text, "context": context}, config, **kwargs
+            )
         elif "text" in input_args:
             text = input_args["text"]
+            output = super().invoke({"text": text}, config, **kwargs)
         else:
             raise ValueError("Missing text argument.")
-        output = super().invoke({"text": text, "context": context}, config, **kwargs)
         if average_score is not None:
             output["score"] = average_score
         return output

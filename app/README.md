@@ -332,10 +332,11 @@ You can list available databases and their uploaded references from current conf
 You can add an `.epub` document to the vector DB of the given RAG associated to a database, using:
 - Endpoint: `/add_reference`
 - Method: **POST**
-- File sent on multipart
-- Body:
-  `database` - database to insert reference
-  `reference` - reference to insert
+- Request:
+  - File sent on multipart
+  - Body:
+    `database` - database to insert reference
+    `reference` - reference to insert
 - Example:
   ```
   curl -F "file=@/path/data/Victor_Hugo_Notre-Dame_De_Paris_en.epub" http://0.0.0.0:5000/add_reference
@@ -350,9 +351,10 @@ You can add an `.epub` document to the vector DB of the given RAG associated to 
 You can remove a reference to the vector DB of the given RAG associated to a database, using:
 - Endpoint: `/delete_reference`
 - Method: **DELETE**
-- Body:
-  `database` - database to remove reference from
-  `reference` - reference to delete
+- Request:
+  - Body:
+    `database` - database to remove reference from
+    `reference` - reference to delete
 - Example:
   ```
   curl --form 'database="Litterature"' --form 'reference="NDame de Paris"'  http://0.0.0.0:5000/delete_reference

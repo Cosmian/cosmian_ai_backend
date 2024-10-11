@@ -173,12 +173,12 @@ class VectorDB(VectorStore):
         """Insert a document into the vector store."""
         document = __load_document__(document_path)
         chunks = self._splitter.split_documents([document])
-        documents_with_metadata = []
         for _doc in chunks:
             _doc.metadata["reference"] = reference
         self._db.add_documents(chunks)
 
     def delete_reference(self, reference: str):
+        """Delete a reference from the vector store."""
         idx_to_delete = []
         uuid_to_delete = []
         documents = self._db.docstore._dict

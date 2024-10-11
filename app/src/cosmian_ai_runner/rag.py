@@ -18,7 +18,8 @@ class Rag:
     and language models.
     Attributes:
         db (VectorDB): The vector database for storing and retrieving documents.
-        rag_chain (RunnableSerializable[Any, dict[str, Any]]): The RAG chain for generating responses.
+        rag_chain (RunnableSerializable[Any, dict[str, Any]]): The RAG chain for
+        generating responses.
     """
 
     db: VectorDB

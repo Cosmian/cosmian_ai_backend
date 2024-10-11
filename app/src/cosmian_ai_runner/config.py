@@ -58,7 +58,31 @@ class AppConfig:
         return None
 
     @classmethod
-    def get_databases_config(cls) -> Optional[list]:
+    def get_summary_config(cls) -> Dict:
+        """
+        Get the summary configuration.
+        Returns:
+            Optional[Dict]: The summary configuration if available, otherwise None.
+        """
+        config = cls.get()
+        if "summary" in config:
+            return config["summary"]
+        raise AttributeError("Missing summary config")
+
+    @classmethod
+    def get_translation_config(cls) -> Dict:
+        """
+        Get the translation configuration.
+        Returns:
+            Optional[Dict]: The translation configuration if available, otherwise None.
+        """
+        config = cls.get()
+        if "translation" in config:
+            return config["translation"]
+        raise AttributeError("Missing translation config")
+
+    @classmethod
+    def get_databases_config(cls) -> Dict:
         """
         Get the models configuration.
         Returns:
@@ -67,4 +91,4 @@ class AppConfig:
         config = cls.get()
         if "databases" in config:
             return config["databases"]
-        return None
+        raise AttributeError("Missing databases config")
