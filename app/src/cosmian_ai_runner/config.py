@@ -15,6 +15,7 @@ class AppConfig:
     specific sections of the configuration such as authentication, models, and
     sentence transformer configurations.
     """
+
     _config: Optional[Dict] = None
 
     @classmethod

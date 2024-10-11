@@ -4,6 +4,7 @@ using Hugging Face and Langchain libraries. It includes classes and functions
 to load models with various configurations and a custom implementation of
 LLMChain to add additional functionality such as scoring.
 """
+
 import os
 from typing import Any, Dict, Optional
 
@@ -16,8 +17,12 @@ from langchain_core.documents import Document
 from langchain_core.language_models import BaseLLM
 from langchain_core.runnables import RunnableConfig
 from langchain_huggingface import HuggingFacePipeline
-from transformers import (AutoModelForCausalLM, AutoModelForSeq2SeqLM,
-                          AutoTokenizer, pipeline)
+from transformers import (
+    AutoModelForCausalLM,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    pipeline,
+)
 
 from .detect import is_gpu_available
 
@@ -35,6 +40,7 @@ class ModelValue:
         task (str): The task type (e.g., text-generation).
         kwargs (Any): Additional keyword arguments for model configuration.
     """
+
     def __init__(self, model_id: str, file: Any, prompt: Any, task: str, kwargs: Any):
         self.model_id = model_id
         self.file = file
@@ -112,6 +118,7 @@ class LLM(LLMChain):
     Attributes:
         model (ModelValue): The model configuration and parameters.
     """
+
     def __init__(self, model: ModelValue):
         model_id = model.model_id
         model_file = model.file
@@ -144,10 +151,15 @@ class LLM(LLMChain):
         if "context" in input_args:
             documents: list[Document] = input_args["context"]
             text = " ".join([doc.page_content for doc in documents])
-            context = [{
-                "content": doc.page_content,
-                "metadata": {k: v for k, v in doc.metadata.items() if k != 'source'}
-            } for doc in documents]
+            context = [
+                {
+                    "content": doc.page_content,
+                    "metadata": {
+                        k: v for k, v in doc.metadata.items() if k != "source"
+                    },
+                }
+                for doc in documents
+            ]
             has_scores = len(documents) > 0 and all(
                 doc.metadata.get("score") is not None for doc in documents
             )

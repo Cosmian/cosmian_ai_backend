@@ -59,21 +59,7 @@ if data_list is not None and len(data_list) > 0:
         sentence_transformer = STValue(file, score_threshold)
         RAG = Rag(sentence_transformer=sentence_transformer)
 
-        database_values[name] = {
-            "model" : model_value,
-            "rag": RAG,
-            "references": []
-        }
-
-# sources = [
-#     "data/Victor_Hugo_Notre-Dame_De_Paris_en.epub",
-#     # "data/Victor_Hugo_Les_Miserables_Fantine_1_of_5_en.epub",
-#     # "data/Victor_Hugo_Ruy_Blas_fr.epub",
-# ]
-# for source in sources:
-#     print(f"Loading {source}...")
-#     RAG.add_document(source)
-# print("RAG populated.")
+        database_values[name] = {"model": model_value, "rag": RAG, "references": []}
 
 
 @app.post("/summarize")
@@ -144,13 +130,13 @@ def health_check():
 @check_token()
 async def list_databases():
     """
-    List all the configured RAG.
+    List all the configured databases (model, associated sentence transformer and stored references).
     Returns a JSON response with the list of RAG.
     """
     names = list(database_values.keys())
     databases = {}
     for name in names:
-        references = database_values[name]['references']
+        references = database_values[name]["references"]
         databases[name] = references
     return jsonify(
         {
@@ -159,13 +145,13 @@ async def list_databases():
     )
 
 
-@app.post("/rag")
+@app.post("/predict")
 @check_token()
 async def build_rag():
     """
     Make a prediction using the loaded RAG.
     Expects 'text' and 'database' in form data.
-    Returns a JSON response with the RAG prediction.
+    Returns a JSON response with the RAG prediction and its context.
     """
     if "text" not in request.form:
         return ("Error: Missing text content", 400)
@@ -175,19 +161,19 @@ async def build_rag():
     query = request.form["text"]
     database_name = request.form["database"]
 
-
     if is_gpu_available():
         print("GPU is available.")
 
-    # Choose the model
-    if database_name:
-        try:
-            model = database_values[database_name]["model"]
-            RAG = database_values[database_name]["rag"]
-        except KeyError as e:
-            return (f"Error model/RAG not found: {e}", 404)
-    else:
-        return Exception("Error model/RAG not found", 404)
+    try:
+        database = database_values[database_name]
+    except KeyError as e:
+        return (f"Error database not found: {e}", 404)
+
+    try:
+        model = database["model"]
+        RAG = database["rag"]
+    except KeyError as e:
+        return (f"Error model/RAG not found: {e}", 404)
 
     print(f"Using LLM: {model.model_id}")
     try:
@@ -201,26 +187,31 @@ async def build_rag():
         return (f"Error during prediction: {e}", 400)
 
 
-@app.post("/add_document")
+@app.post("/add_reference")
 @check_token()
-async def add_doc():
+async def add_ref():
     """
-    Load a document into the vector database.
+    Load a reference into the vector database.
     Expects a file with '.epub' extension in form data.
     Returns a success message or error.
     """
     if "database" not in request.form:
         return ("Error: Missing selected database", 400)
+    if "reference" not in request.form:
+        return ("Error: Missing reference", 400)
     if not os.path.exists("data"):
         os.makedirs("data")
     if "file" not in request.files:
         return jsonify({"Error": "No file part"}), 400
-    if "reference" not in request.form:
-        return ("Error: Missing reference", 400)
 
     file = request.files["file"]
     database_name = request.form["database"]
     reference = request.form["reference"]
+
+    try:
+        database = database_values[database_name]
+    except KeyError as e:
+        return (f"Error database not found: {e}", 404)
 
     if file.filename == "":
         return jsonify({"Error": "No selected file"}), 400
@@ -234,9 +225,13 @@ async def add_doc():
             file.save(temp_file_name)
 
         try:
-            RAG = database_values[database_name]["rag"]
+            RAG = database["rag"]
+        except KeyError as e:
+            return (f"Error model/RAG not found: {e}", 404)
+
+        try:
             RAG.add_document(temp_file_name, reference)
-            database_values[database_name]["references"].append(reference)
+            database["references"].append(reference)
             return ("File successfully processed", 200)
         except Exception as e:
             return (f"Error adding file: {e}", 400)
@@ -244,3 +239,41 @@ async def add_doc():
             os.remove(temp_file_name)
     else:
         return ({"Error": "Invalid file extension - must be epub."}, 400)
+
+
+@app.delete("/delete_reference")
+@check_token()
+async def delete_ref():
+    """
+    Delete a reference into the vector database.
+    Returns a success message or error.
+    """
+    if "database" not in request.form:
+        return ("Error: Missing selected database", 400)
+    if "reference" not in request.form:
+        return ("Error: Missing reference", 400)
+
+    database_name = request.form["database"]
+    reference = request.form["reference"]
+
+    indices_to_delete = []
+
+    try:
+        database = database_values[database_name]
+    except KeyError as e:
+        return (f"Error database not found: {e}", 404)
+
+    try:
+        RAG = database["rag"]
+    except KeyError as e:
+        return (f"Error model/RAG not found: {e}", 404)
+
+    try:
+        if reference in database["references"]:
+            RAG.delete_reference(reference)
+            database["references"].remove(reference)
+            return ("Reference successfully removed", 200)
+        else:
+            return ("Error: Reference not found from specified database", 404)
+    except Exception as e:
+        return (f"Error removing reference: {e}", 400)

@@ -3,8 +3,10 @@ This module provides functionality for managing and retrieving documents
 using vector stores and embeddings. It includes classes and methods to
 load, split, and search documents with embeddings using Hugging Face models.
 """
+
 import os
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Type
+import numpy as np
 
 from langchain.text_splitter import CharacterTextSplitter, TextSplitter
 from langchain_community.vectorstores import FAISS
@@ -25,6 +27,7 @@ class STValue:
         file (str): The file path of the sentence transformer model.
         score_threshold (Any): The score threshold for filtering results.
     """
+
     def __init__(self, file: str, score_threshold: Any = None):
         self.file = file
         self.score_threshold = score_threshold
@@ -62,6 +65,7 @@ class VectorDB(VectorStore):
         _score_threshold (Any): The score threshold for filtering results.
         _max_results (int): The maximum number of results to return.
     """
+
     _embeddings: Embeddings
     _splitter: TextSplitter
     _db: VectorStore
@@ -171,8 +175,24 @@ class VectorDB(VectorStore):
         chunks = self._splitter.split_documents([document])
         documents_with_metadata = []
         for _doc in chunks:
-            _doc.metadata['reference'] = reference
+            _doc.metadata["reference"] = reference
         self._db.add_documents(chunks)
+
+    def delete_reference(self, reference: str):
+        idx_to_delete = []
+        uuid_to_delete = []
+        documents = self._db.docstore._dict
+        for idx, (uuid, _doc) in enumerate(documents.items()):
+            metadata = _doc.metadata
+            if "reference" in metadata and _doc.metadata["reference"] == reference:
+                idx_to_delete.append(idx)
+                uuid_to_delete.append(uuid)
+        if idx_to_delete:
+            self._db.index.remove_ids(np.array(idx_to_delete))
+            for uuid in uuid_to_delete:
+                del self._db.docstore._dict[uuid]
+        else:
+            print(f"No vectors found for reference: {reference}")
 
 
 def __load_document__(path: str) -> Document:
