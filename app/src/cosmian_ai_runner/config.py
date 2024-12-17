@@ -15,6 +15,7 @@ class AppConfig:
     specific sections of the configuration such as authentication, models, and
     sentence transformer configurations.
     """
+
     _config: Optional[Dict] = None
 
     @classmethod
@@ -42,7 +43,6 @@ class AppConfig:
         """
         if cls._config:
             return cls._config
-        raise AttributeError("Missing or empty config")
 
     @classmethod
     def get_auth_config(cls) -> Optional[Dict]:
@@ -52,30 +52,6 @@ class AppConfig:
             Optional[Dict]: The authentication configuration if available, otherwise None.
         """
         config = cls.get()
-        if "auth" in config:
+        if config is not None and "auth" in config:
             return config["auth"]
-        return None
-
-    @classmethod
-    def get_models_config(cls) -> Optional[list]:
-        """
-        Get the models configuration.
-        Returns:
-            Optional[list]: The models configuration if available, otherwise None.
-        """
-        config = cls.get()
-        if "models" in config:
-            return config["models"]
-        return None
-
-    @classmethod
-    def get_sentence_transformer_config(cls) -> Optional[list]:
-        """
-        Get the sentence transformer configuration.
-        Returns:
-            Optional[list]: The sentence transformer configuration if available, otherwise None.
-        """
-        config = cls.get()
-        if "sentence_transformer" in config:
-            return config["sentence_transformer"]
         return None

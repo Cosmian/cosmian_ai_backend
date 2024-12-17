@@ -2,32 +2,14 @@
 
 API to run a language model in a confidential VM
 
+
 ## Install dependencies
 
-## CPU
-
 By default all dependencies will be installed with the app.
-If you don't need CUDA support, you can save space by installing PyTorch for CPU only:
-
 ```sh
-cp requirements.cpu.txt requirements.txt
-pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+pip install -r requirements.txt
 ```
 
-To use Intel AVX/AMX extensions:
-
-```sh
-pip install intel-extension-for-pytorch
-```
-
-### GPU Apple Silicon (Metal)
-
-To use the Apple Silicon Metal GPUs, install the following requirements: [https://github.com/context-labs/mactop]
-
-```shell
-cp requirements.metal.txt requirements.txt
-CT_METAL=1  pip install -r requirements.txt
-```
 
 ## Build and install the app
 
@@ -36,11 +18,13 @@ python -m build
 pip install dist/*.whl
 ```
 
+
 ## Test it
 
 ```sh
-CONFIG_PATH="./tests/config.json" python tests/test.py
+CONFIG_PATH="./tests/config.json" HF_API_TOKEN="xxx" python tests/test.py
 ```
+
 
 ## Serve the API
 
@@ -49,6 +33,21 @@ Be sure to have `~/.local/bin` in your `PATH`
 ```sh
 CONFIG_PATH="./tests/config.json" cosmian-ai-runner
 ```
+
+
+## Hardware optimization
+
+When running on Intel Xeon processors, the application can leverage AMX (Advanced Matrix Extensions) to significantly
+enhance performance, especially for matrix-intensive operations commonly found in machine learning workloads. To enable
+this feature, simply start the application with the `--amx` option.
+
+```sh
+CONFIG_PATH="./tests/config.json" HF_API_TOKEN="xxx" cosmian-ai-runner -p 5001 --amx
+```
+
+If you are running the Flask application locally using flask run, you can enable the AMX option by setting the
+environment variable `AMX_ENABLED` to "1"
+
 
 ## Config file
 
@@ -65,75 +64,6 @@ It should contain a list of the following fields per identity providers:
 
 - `client_id`: ID of the client calling this application set by the identity provider
 
-### Summary
-
-Information about the summarization models to use and generation parameters.
-
-Different models can be used depending on the language of the document to summarize.
-It is **mandatory** to have at least a `default` model entry.
-
-We recommend to use `facebook/bart-large-cnn` (400M parameters).
-You can specify a custom `generation_config`, you can see the default one for your model on HuggingFace: [generation_config.json](https://huggingface.co/facebook/bart-large-cnn/blob/main/generation_config.json).
-You can find more information about text generation [here](https://huggingface.co/blog/how-to-generate).
-
-### Translation
-
-Information about the translation model to use and generation parameters.
-
-We recommend to use `facebook/nllb-200-distilled-600M` (600M parameters).
-
-### Models
-
-Models configuration defines available models for `/predict` and `/rag` routes.
-
-For classic huggingface pipeline models, model configuration should be structured as follow:
-
-```json
-        {
-            "model_id": "facebook/bart-large-cnn",
-            "task": "summarization",
-            "prompt": "{text}",
-            "kwargs": {
-                "temperature": 0.1,
-                "do_sample": true,
-                "truncation": true,
-                "max_new_tokens": 200
-            }
-        }
-```
-
-For gguf models, model should be structured as follow (selected file, over different available quantizations must be precised):
-
-```json
-      {
-          "model_id": "TheBloke/Spring-Dragon-GGUF",
-          "file": "spring-dragon.Q2_K.gguf",
-          "prompt": "",
-          "kwargs": {
-              "max_new_tokens": 256,
-              "temperature": 0.01,
-              "context_length": 4096,
-              "repetition_penalty": 1.1,
-              "gpu_layers": 0
-          }
-      }
-```
-
-### Sentence Transformer
-
-Sentence transformer configuration defines which setence transformer to use when creating RAG (on server launch).
-
-```json
-  {
-    "sentence_transformer":
-    {
-        "file": "sentence-transformers/all-MiniLM-L12-v2",
-        "score_threshold": 0.12
-    }
-  }
-  ```
-
-If no element is configured, RAG is not created and `/rag` routes will send an error when fetched.
 
 ### Sample config file
 
@@ -147,21 +77,6 @@ If no element is configured, RAG is not created and `/rag` routes will send an e
       }
     ]
   },
-  "summary": {
-    "default": {
-      "model_name": "facebook/bart-large-cnn",
-      "generation_config": {
-        "max_length": 140,
-        "min_length": 30
-      }
-    }
-  },
-  "translation": {
-    "model_name": "facebook/nllb-200-distilled-600M",
-    "generation_config": {
-      "max_length": 200
-    }
-  }
 }
 ```
 
@@ -199,75 +114,115 @@ curl 'http://0.0.0.0:5000/summarize' \
     `src_lang` - source language
     `tgt_lang` - targeted language
 - Response:
-```json
-  {
-    "translation": "translated text..."
-  }
-```
+  ```json
+    {
+      "translation": "translated text..."
+    }
+  ```
 - Example:
-```
-curl 'http://0.0.0.0:5000/translate' \
---form 'doc="Il était une fois, dans un royaume couvert de vert émeraude et voilé dans les secrets murmurants des arbres anciens, vivait une princesse nommée Elara.."' --form 'src_lang=fr'  --form 'tgt_lang=en'
-```
+  ```
+  curl 'http://0.0.0.0:5000/translate' \
+  --form 'doc="Il était une fois, dans un royaume couvert de vert émeraude et voilé dans les secrets murmurants des arbres anciens, vivait une princesse nommée Elara.."' --form 'src_lang=fr'  --form 'tgt_lang=en'
+  ```
 
-### Predict
+### Predict using text as context
 
-- Endpoint: `/predict`
+- Endpoint: `/context_predict`
 - Method: **POST**
-- Description: get prediction from a model available in application configuration (using
-  HuggingFacePipeline, or a gguf model)
+- Description: get prediction from a model using current text as a context
 - Request:
   - Headers: 'Content-Type: multipart/form-data'
   - Body:
-    `text` - text to use for prediction
-    `model` - model_id to use for inference
-- Response:
-```json
-  {
-    "response": "generated text..."
-  }
-```
+    `context` - text to use as context for prediction
+    `query` - query to answer
 - Example:
-```
-curl 'http://0.0.0.0:5000/predict' \
---form 'text="What color is a banana?"' --form 'model="google/flan-t5-small"'
-```
+  ```
+  curl 'http://0.0.0.0:5000/context_predict' \
+  --form 'query="Who is Elara?"' --form 'context="Elara is a girl living in a forest..."'
+  ```
+- Response:
+  The response contains the answer to the query, from given context.
+  ```json
+    {
+      "result": ["Elara is the sovereign of the mystical forests of Eldoria"]
+    }
+  ```
 
-You can list available models from current configuration using:
-- Endpoint: `/models`
+### Predict using RAG
+
+- Endpoint: `/rag_predict`
+- Method: **POST**
+- Description: get prediction from a model using RAG and configured documentary basis
+- Request:
+  - Headers: 'Content-Type: multipart/form-data'
+  - Body:
+    `db` - documentary basis to use for prediction
+    `query` - query to answer
+- Example:
+  ```
+  curl 'http://0.0.0.0:5000/rag_predict' \
+  --form 'query="Who is Esmeralda?"' --form 'db="litterature"'
+  ```
+- Response:
+  The response contains the answer to the query, from given context.
+  ```json
+    {
+      "result": ["a street dancer"]
+    }
+  ```
+
+You can list available documentary basis and their uploaded references from current configuration using:
+- Endpoint: `/documentary_basis`
 - Method: **GET**
-
-###  RAG
-
-Those routes are available if a sentence_transformer has been provided in the configuration file.
-The sentence_transformer is used to create and infer vectors
-- Endpoint: `/rag`
-- Method: **POST**
-- Description: get prediction from a RAG, using a model available in application configuration
-- Request:
-  - Headers: 'Content-Type: multipart/form-data'
-  - Body:
-    `text` - text to use for rag request
-    `model` - model_id to use for inference after RAG step
-- Response:
-```json
+- Example:
+  ```
+  curl 'http://0.0.0.0:5000/documentary_bases'
+  ```
+- Reponse:
+  ```
   {
-    "response": "generated text..."
+      "documentary_bases": {
+          "litterature": [
+              "NDame de Paris"
+          ],
+          "science": []
+      }
   }
-```
-- Example:
-```
-curl 'http://0.0.0.0:5000/rag' \
---form 'text="Who is Esmeralda?"' --form 'model="facebook/bart-large-cnn"'
-```
+  ```
 
-You can add an `.epub` document to the vector DB of the current RAG, using:
-- Endpoint: `/add_document`
+###  Manage references
+
+You can add an `.epub` document, `.docx` document or a PDF to the vector DB of the given RAG associated to a database, using:
+- Endpoint: `/add_reference`
 - Method: **POST**
-- File sent on multipart
+- Request:
+  - File sent on multipart
+  - Body:
+    `db` - database to insert reference
+    `reference` - reference to insert
 - Example:
-```
-curl -F "file=@/path/data/Victor_Hugo_Notre-Dame_De_Paris_en.epub" http://0.0.0.0:5000/add_document
-```
+  ```
+  curl -F "file=@/data/doc.pdf" --form 'db="litterature"' --form 'reference="crypto"'  http://0.0.0.0:5000/add_reference
+  ```
+- Response:
+  ```
+  File successfully processed
+  ```
 
-*So far, only epub files can be handled.*
+*So far, only epub, pdf and docx files can be handled.*
+
+You can remove a reference to the vector DB of the given RAG associated to a database, using:
+- Endpoint: `/delete_reference`
+- Method: **DELETE**
+- Request:
+  - Body:
+    `db` - database to remove reference from
+    `reference` - reference to delete
+- Example:
+  ```
+  curl --form 'db="Litterature"' --form 'reference="NDame de Paris"'  http://0.0.0.0:5000/delete_reference
+  ```
+- Response:
+  ```
+  Reference successfully removed
+  ```
